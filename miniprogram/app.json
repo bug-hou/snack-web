@@ -9,15 +9,15 @@
   ],
   "cloud": true,
   "window": {
-    "backgroundColor": "#FFF9F1",
+    "backgroundColor": "#F5F5F5",
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#FFF9F1",
+    "navigationBarBackgroundColor": "#F5F5F5",
     "navigationBarTitleText": "保利爱尚里 · 口袋便利铺",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#9B7D76",
-    "selectedColor": "#F45F4D",
+    "color": "#898989",
+    "selectedColor": "#E1251B",
     "borderStyle": "white",
     "backgroundColor": "#FFFFFF",
     "list": [
