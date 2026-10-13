@@ -1,0 +1,11 @@
+<view class="snack-page profile-page">
+  <view class="page-lead"><view class="small-kicker">HELLO THERE / 关于小店</view><view class="page-title">家门口的便利，<view>每一单都送到<text class="title-period">.</text></view></view><view class="page-sub">把喜欢的味道，留给忙碌生活里的你</view></view>
+  <view class="profile-hero"><view class="profile-stamp">POCKET GOODS</view><view><view class="profile-hero-title">口袋便利铺</view><view class="profile-hero-sub">鸡蛋、牛奶、日常用品，邻里到家</view></view></view>
+  <view class="profile-section"><view class="profile-section-heading">配送服务</view><view class="profile-row"><view><view class="profile-row-title">保利爱尚里上门配送</view><view class="profile-row-sub">仅限小区 16、17、18 栋</view></view><text>送到门口</text></view><view class="profile-row"><view><view class="profile-row-title">送达方式自选</view><view class="profile-row-sub">下单时选择敲门或到达后电话联系</view></view><text>按需选择</text></view><view class="profile-row"><view><view class="profile-row-title">营业与配送</view><view class="profile-row-sub">{{hours}}</view></view><text>{{isOpen ? '接单中' : '休息中'}}</text></view><view class="profile-row"><view><view class="profile-row-title">配送规则</view><view class="profile-row-sub">商品满 ¥{{minOrder}} 起送 · 配送费 ¥{{deliveryFee}}</view></view><text>货到付款</text></view></view>
+  <view class="profile-section"><view class="profile-row" bindtap="goAddress"><view><view class="profile-row-title">我的收货地址</view><view class="profile-row-sub">管理常用楼栋、门牌号和联系电话</view></view><text>查看　›</text></view></view>
+  <view wx:if="{{isOwner}}" class="profile-section"><view class="profile-row" bindtap="goOrders"><view class="profile-row-title">订单管理</view><text>前往　→</text></view></view>
+  <view wx:if="{{ownerId}}" class="profile-section"><view class="profile-row" bindtap="toggleOwnerId"><view><view class="profile-row-title">店主身份绑定</view><view class="profile-row-sub">需要在网页商家端绑定小程序时使用</view></view><text>{{showOwnerId ? '收起' : '查看'}}</text></view><view wx:if="{{showOwnerId}}" class="owner-id"><text selectable="{{true}}">{{ownerId}}</text><view bindtap="copyOwnerId">复制我的标识</view></view></view>
+  <view class="compliance-note"><view class="compliance-title">温馨提示</view><view>订单提交后可在“订单”页查看处理、配货与配送进度。实际送达时间以店主接单安排为准。</view></view>
+  <view class="profile-link" bindtap="goShop">继续选购　→</view>
+  <view class="profile-footer">保利爱尚里 · 口袋便利铺</view>
+</view>

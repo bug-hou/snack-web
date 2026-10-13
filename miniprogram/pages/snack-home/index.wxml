@@ -1,0 +1,57 @@
+<view class="shop-page">
+  <view class="shop-header">
+    <view class="brand-line">
+      <view>
+        <view class="brand-kicker">保利爱尚里 · 小区便利送</view>
+        <view class="brand-name">口袋便利铺<text class="brand-dot">.</text></view>
+      </view>
+      <view class="header-bag" bindtap="openCart">购物车<text wx:if="{{count}}" class="bag-count">{{count}}</text></view>
+    </view>
+    <view class="address-entry" bindtap="goAddress"><view class="address-pin">⌖</view><view class="address-copy"><view class="address-caption">送到这里 <text wx:if="{{shopStatus}}" class="shop-state">{{shopStatus}}</text></view><view class="address-current">{{addressText}} <text>›</text></view><view class="address-sub">{{addressHint}}</view></view></view>
+    <view class="delivery-hint"><text class="hint-mark"></text>保利爱尚里 16 / 17 / 18 栋上门配送</view>
+  </view>
+
+  <scroll-view scroll-y="{{true}}" class="shop-scroll" enable-back-to-top="{{true}}">
+    <view class="shop-content">
+      <view class="hero-card">
+        <view class="hero-copy">
+          <view class="hero-kicker">GOOD THINGS, CLOSE TO HOME</view>
+          <view class="hero-title">家里缺了什么？<view>送到你家门口。</view></view>
+          <view class="hero-desc">鸡蛋 · 牛奶 · 居家好物，邻里上门配送</view>
+          <view class="hero-badge">小区专送 · 货到付款　→</view>
+        </view>
+        <view class="hero-art">
+          <view class="hero-sun"></view>
+          <view class="hero-pack"><view class="hero-pack-line"></view><text>DAILY</text><text class="hero-pack-small">AT YOUR DOOR</text></view>
+        </view>
+      </view>
+      <view class="benefit-row">
+        <view class="benefit"><view class="benefit-symbol">01</view><view><view class="benefit-title">好吃不将就</view><view class="benefit-desc">认真挑选每一口</view></view></view>
+        <view class="benefit"><view class="benefit-symbol">02</view><view><view class="benefit-title">到家更轻松</view><view class="benefit-desc">16 / 17 / 18 栋</view></view></view>
+      </view>
+      <view class="section-head"><view><view class="section-eyebrow">EDITOR'S PICK</view><view class="section-name">邻里常买</view></view><text class="section-aside">日常所需到家</text></view>
+      <scroll-view scroll-x="{{true}}" class="featured-scroll" show-scrollbar="{{false}}">
+        <view wx:for="{{featured}}" wx:key="id" class="featured-item" data-id="{{item.id}}" bindtap="add">
+          <view class="featured-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="featured-image" src="{{item.image}}" mode="aspectFill"/><view wx:else class="mini-pack"><text>{{item.initials}}</text></view></view>
+          <view class="featured-label">{{item.name}}</view><view class="featured-price">¥{{item.price}} <text>＋ 加入</text></view>
+        </view>
+      </scroll-view>
+      <view class="section-head catalog-head"><view><view class="section-eyebrow">FIND YOUR FAVORITE</view><view class="section-name">挑点喜欢的</view></view><text class="section-aside">保利爱尚里专送</text></view>
+      <view class="search-box"><view class="search-icon"></view><input class="search-input" value="{{keyword}}" placeholder="搜索鸡蛋、牛奶、日用品" placeholder-class="search-placeholder" bindinput="onSearch" confirm-type="search"/><text wx:if="{{keyword}}" class="clear-search" bindtap="clearSearch">清除</text></view>
+      <scroll-view scroll-x="{{true}}" class="category-scroll" show-scrollbar="{{false}}"><view wx:for="{{categories}}" wx:key="id" class="category-chip {{activeCategory === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectCategory">{{item.name}}</view></scroll-view>
+      <view class="product-grid">
+        <view wx:for="{{products}}" wx:key="id" class="product-card">
+          <view class="product-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="product-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="product-pack"><view class="pack-name">{{item.initials}}</view></view><view wx:if="{{item.label}}" class="product-tag">{{item.label}}</view></view>
+          <view class="product-name">{{item.name}}</view><view class="product-spec">{{item.spec}}</view>
+          <view class="product-bottom"><view class="product-price"><text>¥</text>{{item.price}}</view><view class="qty-controls"><view wx:if="{{item.quantity}}" class="qty-minus" data-id="{{item.id}}" bindtap="reduce">－</view><text wx:if="{{item.quantity}}" class="qty-value">{{item.quantity}}</text><view class="qty-plus" data-id="{{item.id}}" bindtap="add">＋</view></view></view>
+          <view class="buy-now" data-id="{{item.id}}" bindtap="buyNow">立即购买</view>
+        </view>
+      </view>
+      <view wx:if="{{loading}}" class="empty-results">正在加载商品…</view>
+      <view wx:elif="{{catalogError}}" class="empty-results" bindtap="retryCatalog">{{catalogError}} · 点击重试</view>
+      <view wx:elif="{{products.length === 0}}" class="empty-results">{{keyword ? '没找到这件商品，换个关键词试试' : '暂时没有上架商品，稍后再来看看'}}</view>
+      <view class="bottom-note">家门口的日常补给，送到你家门口。<view>配送范围：保利爱尚里 16 / 17 / 18 栋</view></view>
+    </view>
+  </scroll-view>
+  <view wx:if="{{count}}" class="floating-cart" bindtap="openCart"><view><view class="floating-count">已选 {{count}} 件</view><view class="floating-price">合计 ¥{{total}}</view></view><view class="floating-button">查看购物车　→</view></view>
+</view>

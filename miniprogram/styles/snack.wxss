@@ -1,0 +1,14 @@
+page { background: #FFF9F1; color: #3A2E32; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; }
+.snack-page { min-height: 100vh; padding: 0 30rpx 180rpx; box-sizing: border-box; }
+.page-lead { padding: 52rpx 4rpx 34rpx; }
+.small-kicker { font-size: 20rpx; color: #B34F3A; font-weight: 700; letter-spacing: 3rpx; margin-bottom: 16rpx; }
+.page-title { font-size: 51rpx; font-weight: 750; line-height: 1.2; letter-spacing: -1rpx; }
+.title-period { color: #D87053; }
+.page-sub { font-size: 24rpx; color: #8F8B86; margin-top: 14rpx; line-height: 1.5; }
+.primary-action { display: flex; align-items: center; justify-content: center; min-height: 88rpx; padding: 0 28rpx; border-radius: 24rpx; color: #FFFFFF; background: #FF654E; font-size: 25rpx; font-weight: 700; box-shadow: 0 8rpx 18rpx rgba(255, 101, 78, .18); }
+.empty-art { width: 176rpx; height: 176rpx; background: #EEE6D7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 36rpx; }
+.empty-pack { height: 92rpx; width: 76rpx; background: #D87559; transform: rotate(-10deg); border-radius: 8rpx 8rpx 16rpx 16rpx; box-shadow: 12rpx 12rpx 0 #E4B296; color: #fff; font-size: 17rpx; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.empty-heading { font-size: 32rpx; font-weight: 700; margin-bottom: 14rpx; }
+.empty-copy { font-size: 24rpx; color: #89857F; line-height: 1.7; max-width: 530rpx; margin: 0 auto; }
+.empty-action { margin: 40rpx auto 0; min-width: 260rpx; display: inline-flex; }
+.tone-peach { background: #FFE0B8; }.tone-cocoa { background: #E9D3BE; }.tone-butter { background: #FFF0A4; }.tone-sage { background: #CBECD2; }.tone-rose { background: #FFD4DF; }.tone-mango { background: #FFDB95; }.tone-lemon { background: #F0F3AE; }.tone-oat { background: #E6DAF9; }

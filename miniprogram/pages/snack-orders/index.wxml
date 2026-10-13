@@ -1,0 +1,18 @@
+<view class="snack-page orders-page">
+  <view class="page-lead"><view class="small-kicker">MY ORDERS / 我的订单</view><view class="page-title">每一份期待<text class="title-period">.</text></view><view class="page-sub">{{ownerView ? '店主工作台 · 查看并处理顾客订单' : '查看您的下单与配送进度'}}</view></view>
+  <view wx:if="{{isOwner}}" class="owner-switch" bindtap="toggleView">{{ownerView ? '切回我的订单' : '切换到店主工作台'}}　→</view>
+  <scroll-view scroll-x="{{true}}" class="order-tabs" show-scrollbar="{{false}}"><view wx:for="{{tabs}}" wx:key="id" class="order-tab {{activeTab === item.id ? 'current' : ''}}" data-tab="{{item.id}}" bindtap="selectTab">{{item.name}}</view></scroll-view>
+  <view wx:if="{{loading}}" class="order-message">订单加载中…</view>
+  <view wx:elif="{{error}}" class="order-message"><view>{{error}}</view><view class="retry" bindtap="loadOrders">点击重试</view></view>
+  <block wx:elif="{{filteredOrders.length}}">
+    <view wx:for="{{filteredOrders}}" wx:key="id" class="order-card">
+      <view class="order-card-head"><view><view class="order-no">订单 {{item.id}}</view><view class="order-date">{{item.dateText}}</view></view><view class="order-status status-{{item.status}}">{{item.statusText}}</view></view>
+      <view wx:if="{{item.progress >= 0}}" class="order-progress"><view class="progress-point {{item.progress >= 0 ? 'active' : ''}}">下单</view><view class="progress-point {{item.progress >= 1 ? 'active' : ''}}">处理</view><view class="progress-point {{item.progress >= 2 ? 'active' : ''}}">配货</view><view class="progress-point {{item.progress >= 3 ? 'active' : ''}}">配送</view><view class="progress-point {{item.progress >= 4 ? 'active' : ''}}">完成</view></view>
+      <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="id" class="order-line"><text>{{line.name}} ×{{line.quantity}}</text><text>¥{{line.subtotal}}</text></view>
+      <view class="order-info">收货人：{{item.recipient}} · {{item.phone}}<view>送达地址：{{item.address}}</view><view>送达方式：{{item.contactText}} · {{item.delivery}}</view><view wx:if="{{item.note}}">备注：{{item.note}}</view></view>
+      <view class="order-card-foot"><view><view class="pay-method">商品 ¥{{item.subtotal}} · 配送 ¥{{item.deliveryFee}} · 货到付款</view><view class="order-total">订单合计 ¥{{item.total}}</view></view><view wx:if="{{ownerView ? item.nextStatus : false}}" class="order-action" data-id="{{item.id}}" data-status="{{item.nextStatus}}" bindtap="advance">{{item.nextText}}</view><view wx:if="{{item.canCancel}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancel">取消订单</view></view>
+    </view>
+    <view class="order-bottom">已显示最近 {{filteredOrders.length}} 条订单</view>
+  </block>
+  <view wx:else class="order-empty"><view class="empty-art"><view class="empty-pack">SOON</view></view><view class="empty-heading">还没有相关订单</view><view class="empty-copy">{{ownerView ? '收到新订单后，您可以在这里更新配货和配送进度。' : '选好所需商品，订单会在这里显示处理和配送进度。'}}</view><view class="primary-action empty-action" bindtap="goShop">去选购　→</view></view>
+</view>

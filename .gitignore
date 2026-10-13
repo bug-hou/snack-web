@@ -1,0 +1,9 @@
+server/.env
+agent/.env
+agent/dist/
+server/ordering.db
+server/uploads/
+node_modules/
+snack-admin-web/dist/
+snack-admin-web/.env.local
+.history

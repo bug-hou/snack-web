@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/snack-home/index",
+    "pages/snack-cart/index",
+    "pages/snack-checkout/index",
+    "pages/snack-address/index",
+    "pages/snack-orders/index",
+    "pages/snack-profile/index"
+  ],
+  "cloud": true,
+  "window": {
+    "backgroundColor": "#FFF9F1",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#FFF9F1",
+    "navigationBarTitleText": "保利爱尚里 · 口袋便利铺",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#9B7D76",
+    "selectedColor": "#F45F4D",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      { "pagePath": "pages/snack-home/index", "text": "逛逛" },
+      { "pagePath": "pages/snack-cart/index", "text": "购物车" },
+      { "pagePath": "pages/snack-orders/index", "text": "订单" },
+      { "pagePath": "pages/snack-profile/index", "text": "我的" }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

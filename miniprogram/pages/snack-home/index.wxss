@@ -1,0 +1,52 @@
+@import "../../styles/snack.wxss";
+.shop-page { height: 100vh; display: flex; flex-direction: column; overflow: hidden; background: #FAF7F2; }
+.shop-header { background: #FAF7F2; padding: 30rpx 30rpx 18rpx; flex-shrink: 0; }
+.brand-line { display: flex; justify-content: space-between; align-items: center; }
+.brand-kicker { font-size: 17rpx; color: #AA5642; font-weight: 800; letter-spacing: 2rpx; }
+.preview-pill { font-size: 18rpx; letter-spacing: 0; padding: 6rpx 12rpx; border-radius: 20rpx; background: #F4E5D9; margin-left: 10rpx; }
+.brand-name { font-size: 42rpx; line-height: 1.25; font-weight: 800; margin-top: 8rpx; letter-spacing: 1rpx; }
+.brand-dot { color: #CF6C4F; }
+.header-bag { position: relative; border: 1rpx solid #E9DFD2; background: white; border-radius: 30rpx; padding: 14rpx 20rpx; font-size: 22rpx; font-weight: 600; }
+.bag-count { position: absolute; right: -9rpx; top: -14rpx; min-width: 30rpx; text-align: center; border-radius: 20rpx; background: #C96045; color: white; font-size: 18rpx; padding: 0 5rpx; }
+.delivery-hint { display: flex; align-items: center; margin-top: 18rpx; font-size: 21rpx; color: #8D8A80; }
+.hint-mark { width: 12rpx; height: 12rpx; border-radius: 50%; background: #A5B19A; margin-right: 10rpx; }
+.hint-separator { margin: 0 12rpx; color: #D2C9BD; }
+.shop-scroll { flex: 1; min-height: 0; }
+.shop-content { padding: 10rpx 30rpx 200rpx; }
+.hero-card { position: relative; overflow: hidden; height: 326rpx; background: #EED8C0; border-radius: 30rpx; display: flex; box-shadow: 0 8rpx 22rpx rgba(126,94,75,0.06); }
+.hero-copy { z-index: 1; padding: 36rpx 0 0 34rpx; }
+.hero-kicker { font-size: 17rpx; letter-spacing: 2rpx; font-weight: 700; color: #975B49; }
+.hero-title { font-size: 40rpx; line-height: 1.22; color: #51392F; font-weight: 800; margin-top: 20rpx; }
+.hero-desc { font-size: 22rpx; margin-top: 12rpx; color: #916F5E; }
+.hero-badge { font-size: 21rpx; font-weight: 700; color: #944833; margin-top: 20rpx; }
+.hero-art { position: absolute; width: 272rpx; height: 100%; right: 0; bottom: 0; }
+.hero-sun { position: absolute; width: 232rpx; height: 232rpx; border-radius: 50%; background: #F7E7D2; top: 28rpx; right: 8rpx; }
+.hero-pack { position: absolute; bottom: -18rpx; right: 44rpx; height: 226rpx; width: 146rpx; background: #B65D41; border-radius: 12rpx 12rpx 26rpx 26rpx; transform: rotate(13deg); color: #fff2db; box-shadow: 22rpx 16rpx 0 #D68B60; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 27rpx; font-weight: 800; letter-spacing: 2rpx; }
+.hero-pack-line { width: 90rpx; height: 2rpx; background: #E7C5AA; margin-bottom: 20rpx; }.hero-pack-small { font-size: 12rpx; margin-top: 12rpx; letter-spacing: 1rpx; }
+.benefit-row { display: flex; gap: 14rpx; margin-top: 18rpx; }.benefit { display: flex; align-items: center; flex: 1; min-width: 0; border-radius: 20rpx; padding: 17rpx 14rpx; background: #fff; gap: 10rpx; }.benefit-symbol { border-radius: 50%; background: #F7EEE4; width: 36rpx; height: 36rpx; line-height: 36rpx; text-align: center; flex-shrink: 0; font-size: 17rpx; font-weight: 700; color: #AE6A4C; }.benefit-title { font-size: 20rpx; font-weight: 700; }.benefit-desc { font-size: 17rpx; color: #9A948A; white-space: nowrap; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 44rpx 0 20rpx; }.section-eyebrow { color: #AF624C; font-size: 17rpx; font-weight: 800; letter-spacing: 2rpx; }.section-name { font-size: 34rpx; font-weight: 800; margin-top: 6rpx; }.section-aside { font-size: 19rpx; color: #A39D94; padding-bottom: 6rpx; }.catalog-head { margin-top: 48rpx; }
+.featured-image,.product-image{width:100%;height:100%;display:block;border-radius:inherit}.featured-scroll { width: 100%; white-space: nowrap; }.featured-item { display: inline-block; width: 210rpx; margin-right: 14rpx; vertical-align: top; }.featured-art { height: 154rpx; border-radius: 20rpx; display: flex; justify-content: center; align-items: center; overflow: hidden; }.mini-pack { height: 118rpx; width: 76rpx; border-radius: 6rpx 6rpx 12rpx 12rpx; background: #AC6149; color: #fff; box-shadow: 8rpx 7rpx 0 rgba(105,76,57,0.18); transform: rotate(-9deg); text-align: center; display: flex; flex-direction: column; justify-content: center; font-size: 21rpx; font-weight: 700; }.mini-pack-bottom { font-size: 12rpx; margin-top: 12rpx; letter-spacing: 1rpx; }.featured-label { font-size: 22rpx; font-weight: 700; margin-top: 12rpx; }.featured-price { color: #B4503D; font-size: 21rpx; font-weight: 700; }.featured-price text { color: #97928B; font-size: 18rpx; margin-left: 5rpx; }
+.search-box { background: #fff; border: 1rpx solid #F0E9DF; border-radius: 20rpx; height: 76rpx; padding: 0 22rpx; display: flex; align-items: center; gap: 16rpx; }.search-icon { width: 23rpx; height: 23rpx; border: 3rpx solid #AAA29A; border-radius: 50%; position: relative; flex-shrink: 0; }.search-icon::after { content: ''; position: absolute; width: 12rpx; height: 3rpx; background: #AAA29A; transform: rotate(45deg); right: -10rpx; bottom: -4rpx; }.search-input { flex: 1; font-size: 23rpx; }.search-placeholder { color: #B2AAA2; }.clear-search { font-size: 20rpx; color: #A85B47; }
+.category-scroll { white-space: nowrap; margin: 20rpx 0 24rpx; }.category-chip { display: inline-flex; padding: 13rpx 24rpx; background: #F2EDE6; border-radius: 30rpx; margin-right: 12rpx; font-size: 21rpx; color: #777269; }.category-chip.selected { background: #30372F; color: white; }
+.product-grid { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18rpx 0; }.product-card { width: calc(50% - 9rpx); background: #fff; border-radius: 24rpx; padding: 12rpx 12rpx 17rpx; box-sizing: border-box; box-shadow: 0 4rpx 16rpx rgba(90,70,49,0.035); }.product-art { height: 228rpx; border-radius: 18rpx; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }.product-tag { position: absolute; left: 12rpx; top: 12rpx; background: #fffaf3; border-radius: 24rpx; color: #AD5B42; padding: 5rpx 10rpx; font-size: 16rpx; font-weight: 700; }.product-pack { width: 122rpx; height: 160rpx; border-radius: 9rpx 9rpx 16rpx 16rpx; background: #C27456; box-shadow: 12rpx 10rpx 0 rgba(88,68,53,0.16); transform: rotate(-8deg); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 22rpx 2rpx; box-sizing: border-box; color: #FFF6E9; }.tone-cocoa .product-pack { background: #806153; }.tone-butter .product-pack { background: #D8A353; }.tone-sage .product-pack { background: #82967B; }.tone-rose .product-pack { background: #C6797B; }.tone-mango .product-pack { background: #D98B40; }.tone-lemon .product-pack { background: #A5AF67; }.tone-oat .product-pack { background: #A39275; }.pack-top, .pack-bottom { font-size: 12rpx; letter-spacing: 1rpx; }.pack-name { font-size: 29rpx; font-weight: 800; }.product-name { margin: 16rpx 4rpx 3rpx; font-size: 24rpx; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.product-spec { margin: 0 4rpx; font-size: 18rpx; color: #A29D94; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }.product-bottom { display: flex; justify-content: space-between; align-items: center; margin: 17rpx 4rpx 0; }.product-price { font-size: 28rpx; font-weight: 800; color: #B44E39; }.product-price text { font-size: 20rpx; }.qty-controls { display: flex; align-items: center; gap: 6rpx; }.qty-plus, .qty-minus { width: 40rpx; height: 40rpx; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: #2E342D; color: white; font-size: 25rpx; }.qty-minus { background: #EFECE6; color: #3D4038; }.qty-value { font-size: 19rpx; min-width: 17rpx; text-align: center; }.empty-results { text-align: center; color: #928C83; font-size: 23rpx; padding: 80rpx 0; }
+.bottom-note { text-align: center; margin: 52rpx 0 10rpx; color: #A9A197; font-size: 19rpx; line-height: 1.7; }.floating-cart { position: fixed; bottom: calc(24rpx + env(safe-area-inset-bottom)); left: 30rpx; right: 30rpx; background: #FF654E; border-radius: 24rpx; min-height: 108rpx; padding: 12rpx 14rpx 12rpx 24rpx; display: flex; align-items: center; justify-content: space-between; color: white; box-shadow: 0 12rpx 30rpx rgba(255,101,78,0.23); }.floating-count { font-size: 22rpx; }.floating-price { font-size: 28rpx; font-weight: 800; }.floating-button { background: #FFFFFF; color: #EE5A45; font-size: 21rpx; font-weight: 700; padding: 17rpx 16rpx; border-radius: 17rpx; }
+.shop-page, .shop-header { background: #FFF9F1; }
+.brand-kicker, .section-eyebrow { color: #F15B4F; }
+.delivery-hint { color: #EE6B52; font-weight: 600; }
+.hint-mark { background: #FFB12B; }
+.hero-card { background: #FFE49C; }
+.hero-sun { background: #FFF0BD; }
+.hero-title { color: #743D39; }
+.hero-pack { background: #FF7451; box-shadow: 22rpx 16rpx 0 #FFB553; }
+.benefit-symbol { background: #FFF1CB; color: #EF8742; }
+.category-chip { background: #FFF0DB; color: #8C6656; }
+.category-chip.selected { background: #FF7451; color: #fff; }
+.qty-plus { background: #FF7451; }
+.product-price, .featured-price { color: #F35649; }
+.buy-now { text-align: center; background: #FFEFDF; color: #E85441; border-radius: 14rpx; padding: 10rpx 0; font-size: 21rpx; font-weight: 700; margin: 12rpx 4rpx 0; }
+.shop-state { background: #FFEACF; color: #D15E4A; padding: 4rpx 10rpx; border-radius: 22rpx; margin-left: 8rpx; font-size: 17rpx; white-space: nowrap; }
+.delivery-hint { flex-wrap: wrap; gap: 6rpx 0; }
+.address-entry{display:flex;align-items:center;gap:18rpx;background:#fff;border-radius:22rpx;padding:16rpx 20rpx;margin-top:20rpx;box-shadow:0 5rpx 16rpx rgba(234,110,80,.07)}
+.address-pin{border-radius:50%;width:55rpx;height:55rpx;display:flex;align-items:center;justify-content:center;background:#FFF1DB;color:#F16A4B;font-size:43rpx;flex-shrink:0}
+.address-copy{min-width:0;flex:1}.address-caption{font-size:19rpx;color:#AA8573}.address-current{font-size:26rpx;color:#3D3432;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.address-current text{color:#F06A4F}.address-sub{font-size:19rpx;color:#A59589;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.address-entry .shop-state{padding:1rpx 8rpx;font-size:16rpx}.shop-header .delivery-hint{margin-top:12rpx}

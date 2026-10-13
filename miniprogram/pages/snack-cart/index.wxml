@@ -1,0 +1,14 @@
+<view class="snack-page">
+  <view class="page-lead"><view class="small-kicker">YOUR BAG / 购物车</view><view class="page-title">日常所需都在这<text class="title-period">.</text></view><view class="page-sub">家里缺什么，挑好送到门口后再付款</view></view>
+  <block wx:if="{{count}}">
+    <view class="cart-card">
+      <view class="cart-header"><text>已选 {{count}} 件</text><text class="clear-link" bindtap="clearCart">清空购物车</text></view>
+      <view wx:for="{{items}}" wx:key="id" class="cart-item"><view class="cart-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="cart-image" src="{{item.image}}" mode="aspectFill"/><view wx:else class="cart-pack">{{item.initials}}</view></view><view class="cart-info"><view class="cart-name">{{item.name}}</view><view class="cart-spec">{{item.spec}}</view><view class="cart-price">¥{{item.price}}</view></view><view class="cart-controls"><view class="cart-btn" data-id="{{item.id}}" bindtap="reduce">－</view><text>{{item.quantity}}</text><view class="cart-btn plus" data-id="{{item.id}}" bindtap="add">＋</view></view></view>
+    </view>
+    <view class="cart-summary"><view class="summary-row"><text>商品金额</text><text>¥{{total}}</text></view><view class="summary-row"><text>上门配送费</text><text>¥{{deliveryFee}}</text></view><view class="summary-divider"></view><view class="summary-row emphasis"><text>预计合计</text><text>¥{{payable}}</text></view></view><view wx:if="{{belowMinimum}}" class="notice-card">商品满 ¥{{minOrder}} 起送，再挑点喜欢的吧。</view>
+    <view class="notice-card">仅配送保利爱尚里 16 / 17 / 18 栋，送到家门口后线下付款。</view>
+    <view wx:if="{{catalogError}}" class="notice-card">{{catalogError}}</view>
+    <view class="cart-footer"><view class="cart-footer-price"><text>预计合计</text><view>¥{{payable}}</view></view><view class="primary-action" bindtap="goCheckout">{{belowMinimum ? '继续选购' : '去结算　→'}}</view></view>
+  </block>
+  <view wx:else class="empty-cart"><view class="empty-art"><view class="empty-pack">DAILY</view></view><view class="empty-heading">购物车还空空的</view><view class="empty-copy">家里缺什么？鸡蛋、牛奶、纸巾都可以挑</view><view class="primary-action empty-action" bindtap="goShop">去挑商品　→</view></view>
+</view>
