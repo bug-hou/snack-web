@@ -7,13 +7,20 @@ const auth = cloudbase.init().auth();
 const settingsCollection = db.collection('snack_shop_settings_v1');
 const products = db.collection('snack_products_v1');
 const orders = db.collection('snack_orders_v1');
+const addresses = db.collection('snack_addresses_v1');
+const _ = db.command;
+const $ = _.aggregate;
+const USER_PAGE_SIZE = 20;
+const USER_SCAN_LIMIT = 2000;
+const OPENID_PATTERN = /^[a-zA-Z0-9_-]{16,80}$/;
 const SETTINGS_ID = 'main';
 const STATUSES = { pending: '待处理', processing: '订单处理中', packed: '配货完成', delivering: '配送中', completed: '配送完成', cancelled: '已取消', confirmed: '订单处理中' };
 const NEXT = { pending: ['processing', 'cancelled'], processing: ['packed', 'cancelled'], packed: ['delivering', 'cancelled'], delivering: ['completed'], confirmed: ['packed', 'cancelled'] };
 const CATEGORIES = ['fresh', 'household', 'dairy'];
 const PRODUCT_IMAGES = ['/images/products/eggs.jpg', '/images/products/tissue.jpg', '/images/products/milk.jpg'];
+const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-f0-9]{32}\.(jpg|png|webp)$/;
 const TONES = ['peach', 'cocoa', 'butter', 'sage', 'rose', 'mango', 'lemon', 'oat'];
-const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '' };
+const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '' };
 
 function text(value, max, label) {
   if (typeof value !== 'string' || !value.trim() || value.trim().length > max || /[\u0000-\u001f\u007f]/.test(value)) throw new Error(`${label}格式不正确`);
@@ -40,9 +47,11 @@ function checkedSettings(input) {
   if (businessStart >= businessEnd || deliveryStart >= deliveryEnd) throw new Error('结束时间应晚于开始时间');
   const ownerOpenid = input.ownerOpenid === '' || input.ownerOpenid == null ? '' : text(input.ownerOpenid, 80, '店主微信身份');
   if (ownerOpenid && !/^[a-zA-Z0-9_-]{16,80}$/.test(ownerOpenid)) throw new Error('店主微信身份格式不正确');
+  const ownerWechat = typeof input.ownerWechat === 'string' ? input.ownerWechat.trim() : '';
+  if (ownerWechat && !/^[a-zA-Z0-9_-]{3,40}$/.test(ownerWechat)) throw new Error('店主微信号格式不正确（3-40位字母、数字、下划线或减号）');
   return { ordersEnabled: input.ordersEnabled, businessStart, businessEnd, deliveryStart, deliveryEnd,
     deliveryFeeCents: cents(input.deliveryFeeCents, '配送费', 10000),
-    minOrderCents: cents(input.minOrderCents, '起送价', 1000000), ownerOpenid };
+    minOrderCents: cents(input.minOrderCents, '起送价', 1000000), ownerOpenid, ownerWechat };
 }
 function productInput(input) {
   const name = text(input.name, 40, '商品名称');
@@ -54,8 +63,8 @@ function productInput(input) {
   const label = input.label ? text(input.label, 12, '商品标签') : '';
   const tone = TONES.includes(input.tone) ? input.tone : 'peach';
   if (typeof input.is_available !== 'boolean' || typeof input.featured !== 'boolean') throw new Error('商品状态不正确');
-  const image = input.image ? text(input.image, 100, '商品图片') : '';
-  if (image && !PRODUCT_IMAGES.includes(image)) throw new Error('请选择已提供的商品图片');
+  const image = input.image ? text(input.image, 300, '商品图片') : '';
+  if (image && !PRODUCT_IMAGES.includes(image) && !UPLOADED_IMAGE.test(image)) throw new Error('商品图片不正确，请重新上传');
   return { name, spec, category, priceCents, label, tone, image, initials: name.slice(0, 2),
     is_available: input.is_available, featured: input.featured, updatedAt: Date.now() };
 }
@@ -66,6 +75,64 @@ async function getOrders(input) {
   let query = orders.where(status ? { status } : {});
   const { data } = await query.orderBy('createdAt', 'desc').skip((page - 1) * 20).limit(20).get();
   return { list: data.map(item => ({ ...item, statusText: STATUSES[item.status] || item.status })), page, hasMore: data.length === 20 };
+}
+// 用户来源于下过单或保存过地址的顾客；按最近活跃时间排序，支持按姓名/手机号/门牌搜索
+async function getUsers(input) {
+  const page = Number.isSafeInteger(input.page) && input.page >= 1 && input.page <= 200 ? input.page : 1;
+  const keyword = typeof input.keyword === 'string' ? input.keyword.trim().toLowerCase().slice(0, 30) : '';
+  const [orderGroups, addressGroups] = await Promise.all([
+    orders.aggregate().sort({ createdAt: -1 }).group({
+      _id: '$customerOpenid',
+      orderCount: $.sum(1),
+      spentCents: $.sum($.cond({ if: $.eq(['$status', 'cancelled']), then: 0, else: '$totalCents' })),
+      lastOrderAt: $.max('$createdAt'),
+      recipient: $.first('$recipient'), phone: $.first('$phone'),
+      building: $.first('$building'), room: $.first('$room')
+    }).limit(USER_SCAN_LIMIT).end(),
+    addresses.aggregate().sort({ updatedAt: -1 }).group({
+      _id: '$customerOpenid',
+      addressCount: $.sum(1),
+      lastAddressAt: $.max('$updatedAt'),
+      recipient: $.first('$recipient'), phone: $.first('$phone'),
+      building: $.first('$building'), room: $.first('$room')
+    }).limit(USER_SCAN_LIMIT).end()
+  ]);
+  const users = new Map();
+  for (const g of addressGroups.list) {
+    if (!g._id) continue;
+    users.set(g._id, { openid: g._id, orderCount: 0, spentCents: 0, lastOrderAt: 0,
+      addressCount: g.addressCount || 0, lastAddressAt: g.lastAddressAt || 0,
+      recipient: g.recipient || '', phone: g.phone || '', building: g.building || '', room: g.room || '' });
+  }
+  for (const g of orderGroups.list) {
+    if (!g._id) continue;
+    const existing = users.get(g._id) || { openid: g._id, addressCount: 0, lastAddressAt: 0 };
+    users.set(g._id, { ...existing, orderCount: g.orderCount || 0, spentCents: g.spentCents || 0,
+      lastOrderAt: g.lastOrderAt || 0,
+      recipient: g.recipient || existing.recipient || '', phone: g.phone || existing.phone || '',
+      building: g.building || existing.building || '', room: g.room || existing.room || '' });
+  }
+  let list = [...users.values()].map(u => ({ ...u, lastActiveAt: Math.max(u.lastOrderAt || 0, u.lastAddressAt || 0) }));
+  if (keyword) {
+    list = list.filter(u => [u.recipient, u.phone, `${u.building}栋${u.room}`, u.openid].some(v => String(v || '').toLowerCase().includes(keyword)));
+  }
+  list.sort((a, b) => b.lastActiveAt - a.lastActiveAt);
+  const total = list.length;
+  const start = (page - 1) * USER_PAGE_SIZE;
+  return { list: list.slice(start, start + USER_PAGE_SIZE), page, total, hasMore: start + USER_PAGE_SIZE < total };
+}
+async function getUserDetail(input) {
+  const openid = text(input.openid, 80, '用户标识');
+  if (!OPENID_PATTERN.test(openid)) throw new Error('用户标识格式不正确');
+  const [orderResult, addressResult] = await Promise.all([
+    orders.where({ customerOpenid: openid }).orderBy('createdAt', 'desc').limit(50).get(),
+    addresses.where({ customerOpenid: openid }).orderBy('updatedAt', 'desc').limit(10).get()
+  ]);
+  return {
+    orders: orderResult.data.map(item => ({ ...item, statusText: STATUSES[item.status] || item.status })),
+    addresses: addressResult.data.map(a => ({ id: a._id, label: a.label || '家', recipient: a.recipient, phone: a.phone,
+      building: a.building, room: a.room, contactPreference: a.contactPreference, updatedAt: a.updatedAt }))
+  };
 }
 async function changeStatus(input) {
   const id = text(input.id, 40, '订单编号');
@@ -105,6 +172,8 @@ exports.main = async (event, context) => {
       case 'getDashboard': return { ok: true, data: { settings: await settings() } };
       case 'getOrders': return { ok: true, data: await getOrders(input) };
       case 'changeStatus': return { ok: true, data: await changeStatus(input) };
+      case 'getUsers': return { ok: true, data: await getUsers(input) };
+      case 'getUserDetail': return { ok: true, data: await getUserDetail(input) };
       case 'getProducts': {
         const { data } = await products.limit(100).get();
         return { ok: true, data: data.filter(item => item.archived !== true) };

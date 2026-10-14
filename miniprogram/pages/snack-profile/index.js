@@ -15,7 +15,21 @@ Page({
   },
   toggleOwnerId() { this.setData({ showOwnerId: !this.data.showOwnerId }); },
   copyOwnerId() { if (this.data.ownerId) wx.setClipboardData({ data: this.data.ownerId }); },
+  goService(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!['express', 'purchase', 'secondhand'].includes(id)) return;
+    wx.navigateTo({ url: `/pages/community-service/index?type=${encodeURIComponent(id)}` });
+  },
   goAddress() { wx.navigateTo({ url: '/pages/snack-address/index' }); },
-  goShop() { wx.switchTab({ url: '/pages/snack-home/index' }); },
+  goShop() {
+    wx.switchTab({
+      url: '/pages/snack-home/index',
+      success() {
+        const pages = getCurrentPages();
+        const home = pages[pages.length - 1];
+        if (home && typeof home.goCatalog === 'function') home.goCatalog();
+      }
+    });
+  },
   goOrders() { wx.switchTab({ url: '/pages/snack-orders/index' }); }
 });

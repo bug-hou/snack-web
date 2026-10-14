@@ -6,4 +6,15 @@
 .compliance-note { background: #FFEFED; color: #686868; }
 .profile-row > text { color: #E1251B; }
 .owner-id { padding: 16rpx 0 26rpx; color: #6F6F6F; font-size: 20rpx; word-break: break-all; }
-.owner-id view { margin-top: 14rpx; color: #E1251B; font-weight: 700; }
+.owner-id view { margin-top: 14rpx; color: #34765B; font-weight: 700; }
+page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+.small-kicker, .title-period, .profile-row > text { color: #34765B; }
+.page-title { font-size: 46rpx; }
+.page-sub, .profile-row-sub { color: #66736C; }
+.profile-hero, .profile-link { background: #34765B; }
+.profile-stamp { background: #F6D781; color: #26352E; font-size: 29rpx; letter-spacing: 2rpx; }
+.profile-hero-sub { color: #E5EEE2; font-size: 22rpx; }
+.profile-section { border: 1rpx solid #E6EAE0; }
+.profile-row-title { font-size: 26rpx; }
+.compliance-note { background: #E6EEE1; color: #596D54; }
+.compliance-title { color: #26352E; }

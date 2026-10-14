@@ -5,23 +5,24 @@
     "pages/snack-checkout/index",
     "pages/snack-address/index",
     "pages/snack-orders/index",
-    "pages/snack-profile/index"
+    "pages/snack-profile/index",
+    "pages/community-service/index"
   ],
   "cloud": true,
   "window": {
     "backgroundColor": "#F5F5F5",
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#F5F5F5",
-    "navigationBarTitleText": "保利爱尚里 · 口袋便利铺",
+    "navigationBarTitleText": "爱尚里 · 社区生活",
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#898989",
-    "selectedColor": "#E1251B",
+    "color": "#6C766B",
+    "selectedColor": "#34765B",
     "borderStyle": "white",
     "backgroundColor": "#FFFFFF",
     "list": [
-      { "pagePath": "pages/snack-home/index", "text": "逛逛" },
+      { "pagePath": "pages/snack-home/index", "text": "社区" },
       { "pagePath": "pages/snack-cart/index", "text": "购物车" },
       { "pagePath": "pages/snack-orders/index", "text": "订单" },
       { "pagePath": "pages/snack-profile/index", "text": "我的" }

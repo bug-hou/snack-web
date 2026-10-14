@@ -6,7 +6,7 @@ const products = db.collection('snack_products_v1');
 const orders = db.collection('snack_orders_v1');
 const shopSettings = db.collection('snack_shop_settings_v1');
 const addresses = db.collection('snack_addresses_v1');
-const DEFAULT_SETTINGS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '' };
+const DEFAULT_SETTINGS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '' };
 const STATUS = { pending: '待处理', processing: '订单处理中', packed: '配货完成', delivering: '配送中', completed: '配送完成', cancelled: '已取消', confirmed: '订单处理中' };
 const NEXT = { pending: ['processing', 'cancelled'], processing: ['packed', 'cancelled'], packed: ['delivering', 'cancelled'], delivering: ['completed'], confirmed: ['packed', 'cancelled'] };
 const BUILDINGS = ['16', '17', '18'];
@@ -77,7 +77,28 @@ function publicSettings(settings) {
   return { isOpen: enabled(settings), ordersEnabled: settings.ordersEnabled === true,
     businessStart: settings.businessStart, businessEnd: settings.businessEnd,
     deliveryStart: settings.deliveryStart, deliveryEnd: settings.deliveryEnd,
-    deliveryFeeCents: settings.deliveryFeeCents, minOrderCents: settings.minOrderCents };
+    deliveryFeeCents: settings.deliveryFeeCents, minOrderCents: settings.minOrderCents,
+    ownerWechat: typeof settings.ownerWechat === 'string' ? settings.ownerWechat : '' };
+}
+const DELIVERY_STEP_MS = 5 * 60 * 1000;
+const DELIVERY_MAX_MS = 7 * 24 * 60 * 60 * 1000;
+function formatBeijing(ms) {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(ms));
+  const get = type => parts.find(p => p.type === type).value;
+  return { date: `${get('month')}-${get('day')}`, clock: `${get('hour')}:${get('minute')}` };
+}
+function deliveryLabel(deliveryAt, settings) {
+  if (deliveryAt === 0 || deliveryAt === undefined || deliveryAt === null) return '尽快送达';
+  if (!Number.isSafeInteger(deliveryAt) || deliveryAt % DELIVERY_STEP_MS !== 0) throw new Error('期望送达时间不正确');
+  const now = Date.now();
+  if (deliveryAt < now) throw new Error('期望送达时间已过，请重新选择');
+  if (deliveryAt > now + DELIVERY_MAX_MS) throw new Error('期望送达时间最多可选未来7天');
+  const { date, clock } = formatBeijing(deliveryAt);
+  if (clock < settings.deliveryStart || clock > settings.deliveryEnd) {
+    throw new Error(`期望送达时间需在配送时段 ${settings.deliveryStart}—${settings.deliveryEnd} 内`);
+  }
+  return `期望 ${date} ${clock} 送达`;
 }
 function requireText(value, max, label) {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -102,7 +123,19 @@ function viewOrder(o) {
 }
 async function getCatalog() {
   const res = await products.where({ is_available: true }).limit(100).get();
-  return res.data.filter(p => p.archived !== true && Number.isInteger(p.priceCents) && p.priceCents > 0).map(viewProduct);
+  const list = res.data.filter(p => p.archived !== true && Number.isInteger(p.priceCents) && p.priceCents > 0).map(viewProduct);
+  const fileList = [...new Set(list.map(p => p.image).filter(src => typeof src === 'string' && src.startsWith('cloud://')))];
+  if (fileList.length) {
+    try {
+      const resolved = await cloud.getTempFileURL({ fileList });
+      const urls = new Map((resolved.fileList || []).filter(f => f.tempFileURL).map(f => [f.fileID, f.tempFileURL]));
+      list.forEach(p => { if (urls.has(p.image)) p.image = urls.get(p.image); else if (p.image.startsWith('cloud://')) p.image = ''; });
+    } catch (error) {
+      console.error('resolve product images failed', error);
+      list.forEach(p => { if (p.image.startsWith('cloud://')) p.image = ''; });
+    }
+  }
+  return list;
 }
 async function createOrder(openid, input) {
   const settings = await readSettings();
@@ -128,7 +161,7 @@ async function createOrder(openid, input) {
   const { recipient, phone, building, room, contactPreference } = savedAddress;
   const address = `保利爱尚里 ${building}栋 ${room}`;
   const note = input.note ? requireText(input.note, 100, '备注') : '';
-  const delivery = ['尽快送达', '白天送达', '晚上送达'].includes(input.delivery) ? input.delivery : '尽快送达';
+  const delivery = deliveryLabel(input.deliveryAt, settings);
   const lines = [];
   let subtotalCents = 0;
   for (const [productId, quantity] of quantities) {
@@ -161,8 +194,21 @@ async function createOrder(openid, input) {
   return viewOrder(order);
 }
 async function listOrders(openid, admin) {
-  const res = await orders.where(admin ? {} : { customerOpenid: openid }).orderBy('createdAt', 'desc').limit(50).get();
+  const filter = admin ? {} : { customerOpenid: openid, customerDeleted: db.command.neq(true) };
+  const res = await orders.where(filter).orderBy('createdAt', 'desc').limit(50).get();
   return res.data.map(viewOrder);
+}
+// 顾客删除订单：仅隐藏自己的订单记录，店铺侧仍保留以便对账
+async function deleteOrder(openid, input) {
+  const id = requireText(input.id, 40, '订单编号');
+  if (!/^[a-f0-9]{32}$/.test(id)) throw new Error('订单编号格式不正确');
+  const { data: existing } = await orders.doc(id).get().catch(() => ({ data: null }));
+  if (!existing || existing.customerOpenid !== openid) throw new Error('订单不存在');
+  if (!['completed', 'cancelled'].includes(existing.status)) throw new Error('仅可删除已完成或已取消的订单');
+  const result = await orders.where({ _id: id, customerOpenid: openid, status: existing.status })
+    .update({ data: { customerDeleted: true, customerDeletedAt: Date.now() } });
+  if (!result.stats || result.stats.updated !== 1) throw new Error('订单状态已变化，请刷新后重试');
+  return { id };
 }
 async function changeStatus(openid, input, admin) {
   const id = requireText(input.id, 40, '订单编号');
@@ -195,6 +241,7 @@ exports.main = async (event) => {
       case 'createOrder': return { ok: true, data: await createOrder(openid, input) };
       case 'listOrders': return { ok: true, data: await listOrders(openid, input.asOwner === true && admin) };
       case 'changeStatus': return { ok: true, data: await changeStatus(openid, input, admin) };
+      case 'deleteOrder': return { ok: true, data: await deleteOrder(openid, input) };
       default: return { ok: false, message: '未知操作' };
     }
   } catch (error) {

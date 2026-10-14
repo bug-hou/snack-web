@@ -1,21 +1,28 @@
 const cart = require('../../utils/snack-cart');
-const { loadProducts } = require('../../utils/snack-catalog');
-const { callShop } = require('../../utils/snack-cloud');
+const { products, loadProducts } = require('../../utils/snack-catalog');
+const { peekContext, loadContext } = require('../../utils/snack-context');
 
 Page({
   data: { items: [], count: 0, total: '0.00', catalogError: '', deliveryFee: '0.00',
-    payable: '0.00', minOrder: '0.00', belowMinimum: false, settingsReady: false },
+    payable: '0.00', minOrder: '0.00', belowMinimum: false, settingsReady: false, loading: true },
   async onShow() {
-    this.setData({ settingsReady: false });
+    const cached = peekContext();
+    if (cached) this.applyConfig(cached);
+    // 本地没有商品缓存时展示加载态，避免先闪出“购物车还空空的”
+    this.setData({ loading: !products.length, settingsReady: !!cached });
+    this.refresh();
     try {
-      const [_, config] = await Promise.all([loadProducts(), callShop('getContext')]);
-      this._feeCents = Number.isSafeInteger(config.deliveryFeeCents) ? config.deliveryFeeCents : 0;
-      this._minCents = Number.isSafeInteger(config.minOrderCents) ? config.minOrderCents : 0;
-      this.setData({ catalogError: '', settingsReady: true });
+      const [, config] = await Promise.all([loadProducts(), loadContext()]);
+      this.applyConfig(config);
+      this.setData({ catalogError: '', settingsReady: true, loading: false });
     } catch (error) {
-      this.setData({ catalogError: '暂时无法确认商品和配送信息，请稍后重试' });
+      this.setData({ catalogError: '暂时无法确认商品和配送信息，请稍后重试', settingsReady: false, loading: false });
     }
     this.refresh();
+  },
+  applyConfig(config) {
+    this._feeCents = Number.isSafeInteger(config.deliveryFeeCents) ? config.deliveryFeeCents : 0;
+    this._minCents = Number.isSafeInteger(config.minOrderCents) ? config.minOrderCents : 0;
   },
   refresh() {
     const summary = cart.getSummary();

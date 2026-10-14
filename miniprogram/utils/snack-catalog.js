@@ -7,12 +7,14 @@ const categories = [
 
 const products = [];
 const { callShop } = require('./snack-cloud');
+const { read, write } = require('./snack-cache');
 let loadingPromise;
 
 async function loadProducts() {
   if (!loadingPromise) {
     loadingPromise = callShop('getCatalog').then(list => {
       setProducts(list);
+      write('catalog', products);
       return products;
     }).finally(() => { loadingPromise = null; });
   }
@@ -24,5 +26,8 @@ function setProducts(list) {
   const valid = list.filter(p => p && typeof p.id === 'string' && Number.isInteger(p.priceCents) && p.priceCents > 0);
   products.splice(0, products.length, ...valid);
 }
+
+// 先用本地缓存的商品铺满首屏，随后由 loadProducts 刷新。
+setProducts(read('catalog'));
 
 module.exports = { categories, products, setProducts, loadProducts };
