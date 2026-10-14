@@ -6,7 +6,11 @@
     "pages/snack-address/index",
     "pages/snack-orders/index",
     "pages/snack-profile/index",
-    "pages/community-service/index"
+    "pages/community-service/index",
+    "pages/community-errand/index",
+    "pages/community-share/index",
+    "pages/community-share-form/index",
+    "pages/community-share-detail/index"
   ],
   "cloud": true,
   "window": {

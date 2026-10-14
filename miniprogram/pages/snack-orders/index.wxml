@@ -20,7 +20,7 @@
   <block wx:elif="{{filteredOrders.length}}">
     <view wx:for="{{filteredOrders}}" wx:key="id" class="order-card">
       <view class="card-top">
-        <view class="shop-line"><text class="shop-mark">铺</text><text class="shop-name">口袋便利铺</text><text class="shop-arrow">›</text></view>
+        <view class="shop-line"><text class="shop-mark">{{item.orderType === 'express' ? '取' : item.orderType === 'purchase' ? '买' : '铺'}}</text><text class="shop-name">{{item.kindText}}</text><text class="shop-arrow">›</text></view>
         <view class="order-status status-{{item.status}}">{{item.statusText}}</view>
       </view>
 
@@ -30,13 +30,14 @@
       <view wx:else class="steps cancelled"><text class="step-text">{{item.stepText}}</text></view>
 
       <view class="card-body">
-        <view class="thumbs">
+        <view wx:if="{{item.thumbs.length}}" class="thumbs">
           <view wx:for="{{item.thumbs}}" wx:for-item="thumb" wx:key="id" class="thumb tone-{{thumb.tone}}"><image wx:if="{{thumb.image}}" class="thumb-image" src="{{thumb.image}}" mode="aspectFill"/><text wx:else>{{thumb.initials}}</text></view>
           <view wx:if="{{item.moreCount > 0}}" class="thumb-more">+{{item.moreCount}}</view>
         </view>
         <view class="body-right">
-          <view class="body-lines">{{item.linesText}}</view>
+          <view class="body-lines">{{item.orderType === 'goods' ? item.linesText : item.summaryText}}</view>
           <view class="body-time">{{item.deliveryText}}</view>
+          <view wx:if="{{item.quoteText}}" class="body-quote">{{item.quoteText}}</view>
         </view>
       </view>
 
@@ -44,6 +45,7 @@
         <view class="foot-sum"><text>共 {{item.count}} 件 · 合计</text><text class="foot-total">¥{{item.total}}</text></view>
         <view class="foot-actions">
           <view class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDetail">{{expandedId === item.id ? '收起详情' : '订单详情'}}</view>
+          <view wx:if="{{item.canConfirmQuote}}" class="solid-btn" data-id="{{item.id}}" bindtap="confirmQuote">确认报价</view>
           <view wx:if="{{item.canCancel}}" class="ghost-btn" data-id="{{item.id}}" bindtap="cancel">取消订单</view>
           <view wx:if="{{item.canDelete}}" class="ghost-btn" data-id="{{item.id}}" bindtap="remove">删除订单</view>
           <view wx:if="{{ownerView && item.nextStatus}}" class="solid-btn" data-id="{{item.id}}" data-status="{{item.nextStatus}}" bindtap="advance">{{item.nextText}}</view>
@@ -56,11 +58,18 @@
         <view class="detail-row"><text class="detail-label">送达地址</text><text class="detail-value">{{item.address}}</text></view>
         <view class="detail-row"><text class="detail-label">送达方式</text><text class="detail-value">{{item.contactText}} · {{item.delivery}}</text></view>
         <view wx:if="{{item.note}}" class="detail-row"><text class="detail-label">备注</text><text class="detail-value">{{item.note}}</text></view>
-        <view class="detail-goods">
-          <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="id" class="goods-row"><text class="goods-name">{{line.name}} <text class="goods-spec">{{line.spec}}</text></text><text class="goods-qty">×{{line.quantity}}</text><text class="goods-price">¥{{line.subtotal}}</text></view>
-        </view>
-        <view class="detail-row sum"><text class="detail-label">商品小计</text><text class="detail-value">¥{{item.subtotal}}</text></view>
-        <view class="detail-row sum"><text class="detail-label">上门配送费</text><text class="detail-value">¥{{item.deliveryFee}}</text></view>
+        <block wx:if="{{item.orderType === 'goods'}}">
+          <view class="detail-goods">
+            <view wx:for="{{item.lines}}" wx:for-item="line" wx:key="id" class="goods-row"><text class="goods-name">{{line.name}} <text class="goods-spec">{{line.spec}}</text></text><text class="goods-qty">×{{line.quantity}}</text><text class="goods-price">¥{{line.subtotal}}</text></view>
+          </view>
+          <view class="detail-row sum"><text class="detail-label">商品小计</text><text class="detail-value">¥{{item.subtotal}}</text></view>
+          <view class="detail-row sum"><text class="detail-label">上门配送费</text><text class="detail-value">¥{{item.deliveryFee}}</text></view>
+        </block>
+        <block wx:else>
+          <view wx:for="{{item.serviceLines}}" wx:for-item="line" wx:key="label" class="detail-row"><text class="detail-label">{{line.label}}</text><text class="detail-value">{{line.value}}</text></view>
+          <view wx:if="{{item.orderType === 'purchase' && item.quoteText}}" class="detail-row sum"><text class="detail-label">商品报价</text><text class="detail-value">{{item.quoteText}}</text></view>
+          <view class="detail-row sum"><text class="detail-label">{{item.feeLabel}}</text><text class="detail-value">{{item.feeText}}</text></view>
+        </block>
         <view class="detail-row sum total"><text class="detail-label">订单合计 · 货到付款</text><text class="detail-value">¥{{item.total}}</text></view>
       </view>
     </view>

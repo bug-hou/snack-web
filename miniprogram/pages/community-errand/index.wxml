@@ -1,0 +1,73 @@
+<view class="errand-page">
+  <view class="errand-head">
+    <view class="errand-title">{{title}}</view>
+    <view class="errand-sub">{{subtitle}}</view>
+    <view wx:if="{{config}}" class="open-note {{config.enabled ? 'on' : ''}}">{{openText}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="errand-message">正在加载服务信息…</view>
+  <view wx:elif="{{error}}" class="errand-message">{{error}}</view>
+  <block wx:else>
+    <view class="card">
+      <view class="card-title">送到哪里</view>
+      <picker wx:if="{{addresses.length}}" mode="selector" range="{{addressIds}}" value="{{addressIndex}}" bindchange="pickAddress">
+        <view class="picker-line"><text class="picker-value">{{addressText}}</text><text class="picker-arrow">›</text></view>
+      </picker>
+      <view wx:else class="picker-line empty">还没有收货地址</view>
+      <button class="link-button" bindtap="goAddress">管理收货地址（可保存取件手机尾号）　→</button>
+    </view>
+
+    <block wx:if="{{type === 'express'}}">
+      <view class="card">
+        <view class="card-title">快递站点</view>
+        <picker wx:if="{{stations.length}}" mode="selector" range="{{stations}}" value="{{stationIndex}}" bindchange="pickStation">
+          <view class="picker-line"><text class="picker-value">{{stationIndex >= 0 ? stations[stationIndex] : '请选择快递站点'}}</text><text class="picker-arrow">›</text></view>
+        </picker>
+        <view wx:else class="field"><input class="input" value="{{customStation}}" maxlength="20" placeholder="填写快递站点，如菜鸟驿站" bindinput="stationInput"/></view>
+      </view>
+
+      <view class="card">
+        <view class="card-title">包裹信息</view>
+        <view wx:for="{{packages}}" wx:key="index" class="package-block">
+          <view class="package-head"><text>包裹 {{index + 1}}</text><text wx:if="{{packages.length > 1}}" class="remove" data-index="{{index}}" bindtap="removePackage">移除</text></view>
+          <view class="field"><text class="label">取件码</text><input class="input" value="{{item.code}}" maxlength="32" placeholder="短信或驿站给出的取件码" data-group="package" data-index="{{index}}" data-key="code" bindinput="input"/></view>
+          <view class="field"><text class="label">手机尾号</text><input class="input" type="number" value="{{item.phoneLast4}}" maxlength="4" placeholder="取件手机号后4位" data-group="package" data-index="{{index}}" data-key="phoneLast4" bindinput="input"/></view>
+          <view class="options">
+            <view wx:for="{{sizes}}" wx:for-item="size" wx:key="value" class="option {{item.size === size.value ? 'chosen' : ''}}" data-index="{{index}}" data-value="{{size.value}}" bindtap="pickSize">{{size.label}}</view>
+          </view>
+        </view>
+        <button class="add-more" bindtap="addPackage">＋ 再加一个包裹</button>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="card">
+        <view class="card-title">代买清单</view>
+        <view class="hint">{{config ? config.store : '京东便利店'}}等非官方代买，商品金额按实际门店结算</view>
+        <view wx:for="{{items}}" wx:key="index" class="item-block">
+          <view class="item-head"><text>商品 {{index + 1}}</text><text wx:if="{{items.length > 1}}" class="remove" data-index="{{index}}" bindtap="removeItem">移除</text></view>
+          <view class="field"><input class="input" value="{{item.name}}" maxlength="40" placeholder="商品名称，如 可口可乐" data-group="item" data-index="{{index}}" data-key="name" bindinput="input"/></view>
+          <view class="field"><input class="input" value="{{item.spec}}" maxlength="30" placeholder="规格（可选），如 500ml" data-group="item" data-index="{{index}}" data-key="spec" bindinput="input"/></view>
+          <view class="field"><text class="label">数量</text><input class="input" type="number" value="{{item.quantity}}" maxlength="2" data-group="item" data-index="{{index}}" data-key="quantity" bindinput="input"/></view>
+        </view>
+        <button class="add-more" bindtap="addItem">＋ 再加一项</button>
+        <view class="switch-line" bindtap="toggleSubstitute"><text>缺货时允许同类替换</text><text class="switch {{allowSubstitute ? 'on' : ''}}">{{allowSubstitute ? '已开启' : '已关闭'}}</text></view>
+        <view class="field"><text class="label">预估商品金额</text><input class="input" type="digit" value="{{budget}}" placeholder="选填，便于店主备货" bindinput="budgetInput"/></view>
+      </view>
+    </block>
+
+    <view class="card">
+      <view class="card-title">备注</view>
+      <textarea class="textarea" value="{{note}}" maxlength="100" placeholder="选填，如放门口、稍后电话联系" bindinput="noteInput"/>
+    </view>
+
+    <view class="fee-card">
+      <view class="fee-row"><text>{{type === 'express' ? '代取跑腿费' : '代买跑腿费'}}</text><text class="fee-value">¥{{feeText}}</text></view>
+      <view class="fee-rule">{{feeRule}}</view>
+      <view wx:if="{{type === 'purchase'}}" class="fee-rule">商品金额由店主按实际购买报价，确认后再配送</view>
+    </view>
+
+    <button class="submit-button" disabled="{{submitting || !config || !config.enabled}}" bindtap="submit">{{submitting ? '提交中…' : '提交服务订单'}}</button>
+    <view class="foot-note">货到付款 · 服务时间以店铺配置为准</view>
+  </block>
+</view>

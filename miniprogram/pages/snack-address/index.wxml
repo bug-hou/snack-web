@@ -4,7 +4,7 @@
   <view wx:if="{{loading}}" class="loading">正在加载地址…</view>
   <block wx:elif="{{!editing}}">
     <view wx:for="{{list}}" wx:key="id" class="address-card {{selectedId === item.id ? 'active' : ''}}">
-      <view class="address-main" data-id="{{item.id}}" bindtap="choose"><view class="address-top"><text class="address-tag">{{item.label}}</text><text wx:if="{{selectedId === item.id}}" class="default-tag">当前使用</text></view><view class="address-title">保利爱尚里 {{item.building}}栋 {{item.room}}</view><view class="address-person">{{item.recipient}}　{{item.phone}}</view></view>
+      <view class="address-main" data-id="{{item.id}}" bindtap="choose"><view class="address-top"><text class="address-tag">{{item.label}}</text><text wx:if="{{selectedId === item.id}}" class="default-tag">当前使用</text></view><view class="address-title">保利爱尚里 {{item.building}}栋 {{item.room}}</view><view class="address-person">{{item.recipient}}　{{item.phone}}</view><view wx:if="{{item.pickupPhoneLast4}}" class="address-person">取件手机尾号 {{item.pickupPhoneLast4}}</view></view>
       <view class="address-actions"><text data-id="{{item.id}}" bindtap="edit">编辑</text><text data-id="{{item.id}}" bindtap="remove">删除</text></view>
     </view>
     <view wx:if="{{!list.length}}" class="empty">还没有收货地址，添加一次后下单就不用重复填写啦。</view>
@@ -15,6 +15,7 @@
     <view class="field"><text>地址标签</text><input maxlength="12" placeholder="如 家 / 父母家" value="{{form.label}}" data-key="label" bindinput="update"/></view>
     <view class="field"><text>收货人</text><input maxlength="30" placeholder="请输入收货人姓名" value="{{form.recipient}}" data-key="recipient" bindinput="update"/></view>
     <view class="field"><text>手机号码</text><input type="number" maxlength="11" placeholder="请输入手机号" value="{{form.phone}}" data-key="phone" bindinput="update"/></view>
+    <view class="field"><text>取件手机尾号</text><input type="number" maxlength="4" placeholder="取件手机号后4位，留空同手机号" value="{{form.pickupPhoneLast4}}" data-key="pickupPhoneLast4" bindinput="update"/></view>
     <view class="field"><text>小区</text><text class="fixed">保利爱尚里</text></view>
     <view class="option-title">选择楼栋</view><view class="options"><view wx:for="{{buildings}}" wx:key="*this" class="option {{form.building === item ? 'chosen' : ''}}" data-value="{{item}}" bindtap="building">{{item}}栋</view></view>
     <view class="field"><text>门牌号</text><input maxlength="20" placeholder="如 1201" value="{{form.room}}" data-key="room" bindinput="update"/></view>

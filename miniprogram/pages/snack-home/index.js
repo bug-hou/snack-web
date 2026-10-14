@@ -2,20 +2,23 @@ const { products, categories, loadProducts } = require('../../utils/snack-catalo
 const { peekContext, loadContext } = require('../../utils/snack-context');
 const { getAddresses, peekAddresses } = require('../../utils/snack-address');
 const cart = require('../../utils/snack-cart');
+const { callShop } = require('../../utils/snack-cloud');
 const { services } = require('../../utils/snack-community');
 
 const shopStatusText = config => config.isOpen ? '接单中' : config.ordersEnabled ? '当前休息中' : '暂未营业';
+const SERVICE_PAGES = { express: 'community-errand', purchase: 'community-errand' };
+const SHARE_TONES = ['peach', 'sage', 'butter'];
 
 Page({
   data: {
     services,
-    refreshing: false,
-    scrollTarget: '',
     categories,
     activeCategory: 'all',
     keyword: '',
     products: [],
     featured: products.filter(product => product.featured),
+    shares: [],
+    shareHint: '正在加载邻里闲置…',
     count: 0,
     total: '0.00',
     catalogError: '',
@@ -30,37 +33,14 @@ Page({
     if (cachedContext) this.setData({ shopStatus: shopStatusText(cachedContext) });
     this.applyAddress(peekAddresses());
     this.refresh();
-    this.loadCatalog(); this.loadShopStatus(); this.loadAddress();
+    this.loadCatalog(); this.loadShopStatus(); this.loadAddress(); this.loadShares();
   },
   async onPullDownRefresh() {
     try { await this.refreshCommunity(); }
     finally { wx.stopPullDownRefresh(); }
   },
   async refreshCommunity() {
-    if (this.data.refreshing) return;
-    this.setData({ refreshing: true });
-    try { await Promise.all([this.loadCatalog(), this.loadShopStatus(), this.loadAddress()]); }
-    finally { this.setData({ refreshing: false }); }
-  },
-  openService(event) {
-    const id = event.currentTarget.dataset.id;
-    if (!services.some(service => service.id === id)) return;
-    wx.navigateTo({ url: `/pages/community-service/index?type=${encodeURIComponent(id)}` });
-  },
-  goOrders() { wx.switchTab({ url: '/pages/snack-orders/index' }); },
-  goCatalog() {
-    this.setData({ scrollTarget: '' }, () => {
-      this.setData({ scrollTarget: 'community-catalog' });
-    });
-  },
-  showSharingGuide() {
-    wx.showModal({
-      title: '物品发布须知',
-      content: '分享区尚未开放发布。开放后请上传实物照片、如实说明成色和瑕疵，选择二手转让或免费分享；不要公开手机号和完整门牌号，建议在小区公共区域当面交接。',
-      showCancel: false,
-      confirmText: '我知道了',
-      confirmColor: '#34765B'
-    });
+    await Promise.all([this.loadCatalog(), this.loadShopStatus(), this.loadAddress(), this.loadShares()]);
   },
   applyAddress(result) {
     const selected = result && result.selected;
@@ -77,6 +57,21 @@ Page({
       const config = await loadContext();
       this.setData({ shopStatus: shopStatusText(config) });
     } catch (error) { /* 保留缓存中的状态 */ }
+  },
+  async loadShares() {
+    try {
+      const list = await callShop('listShares', { scope: 'all' });
+      const shares = list.slice(0, 3).map((item, index) => ({
+        id: item.id, title: item.title, modeText: item.modeText,
+        priceText: item.mode === 'sale' ? `¥${item.price}` : '免费',
+        cover: item.images && item.images.length ? item.images[0] : '',
+        initials: (item.title || '闲置').slice(0, 2),
+        tone: SHARE_TONES[index % SHARE_TONES.length]
+      }));
+      this.setData({ shares, shareHint: shares.length ? '' : '还没有邻居发布闲置，成为第一个吧' });
+    } catch (error) {
+      this.setData({ shareHint: '闲置加载失败，下拉刷新重试' });
+    }
   },
   async loadCatalog() {
     this.setData({ loading: !products.length, catalogError: '' });
@@ -102,6 +97,18 @@ Page({
     this.setData({ products: visible, count: summary.count, total: summary.total });
   },
 
+  openService(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!services.some(service => service.id === id)) return;
+    if (id === 'secondhand') { this.goShares(); return; }
+    const page = SERVICE_PAGES[id];
+    if (page) wx.navigateTo({ url: `/pages/${page}/index?type=${encodeURIComponent(id)}` });
+    else wx.navigateTo({ url: `/pages/community-service/index?type=${encodeURIComponent(id)}` });
+  },
+  goShares() { wx.navigateTo({ url: '/pages/community-share/index' }); },
+  goPublish() { wx.navigateTo({ url: '/pages/community-share-form/index' }); },
+  openShare(e) { wx.navigateTo({ url: `/pages/community-share-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}` }); },
+  goOrders() { wx.switchTab({ url: '/pages/snack-orders/index' }); },
   onSearch(e) { this.setData({ keyword: e.detail.value }, () => this.refresh()); },
   clearSearch() { this.setData({ keyword: '' }, () => this.refresh()); },
   selectCategory(e) { this.setData({ activeCategory: e.currentTarget.dataset.id }, () => this.refresh()); },

@@ -1,0 +1,46 @@
+<view class="form-page">
+  <view class="form-head"><view class="form-title">发布闲置</view><view class="form-sub">如实描述成色与瑕疵，让邻居放心接手</view></view>
+
+  <view class="card">
+    <view class="card-title">物品名称</view>
+    <input class="input" value="{{title}}" maxlength="40" placeholder="如 儿童滑板车" data-key="title" bindinput="input"/>
+  </view>
+
+  <view class="card">
+    <view class="card-title">物品描述</view>
+    <textarea class="textarea" value="{{description}}" maxlength="200" placeholder="使用情况、成色、已知瑕疵，越具体越好" data-key="description" bindinput="input"/>
+  </view>
+
+  <view class="card">
+    <view class="card-title">分享方式</view>
+    <view class="options"><view wx:for="{{modes}}" wx:key="value" class="option {{modeIndex === index ? 'chosen' : ''}}" data-index="{{index}}" bindtap="pickMode">{{item.label}}</view></view>
+    <view wx:if="{{modes[modeIndex].value === 'sale'}}" class="field"><text class="label">转让价格</text><input class="input" type="digit" value="{{price}}" placeholder="0.00" data-key="price" bindinput="input"/></view>
+    <view wx:else class="hint">免费分享不需要填写价格，交接时请勿收取费用。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">成色</view>
+    <picker mode="selector" range="{{conditions}}" range-key="label" value="{{conditionIndex}}" bindchange="pickCondition">
+      <view class="picker-line"><text class="picker-value">{{conditions[conditionIndex].label}}</text><text class="picker-arrow">›</text></view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <view class="card-title">交接地点</view>
+    <input class="input" value="{{meetup}}" maxlength="40" placeholder="如 16栋楼下快递柜旁" data-key="meetup" bindinput="input"/>
+    <view class="hint">请填写小区公共地点，不要填写门牌号和手机号。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">实物图片（最多3张）</view>
+    <view class="image-row">
+      <view wx:for="{{images}}" wx:key="*this" class="image-cell"><image class="image-preview" src="{{item}}" mode="aspectFill"/><text class="image-remove" data-index="{{index}}" bindtap="removeImage">移除</text></view>
+      <view wx:if="{{images.length < 3}}" class="image-add" bindtap="chooseImage">＋<text>{{uploading ? '上传中…' : '添加图片'}}</text></view>
+    </view>
+    <view class="hint">支持 JPG / PNG / WebP，单张不超过 3MB。</view>
+  </view>
+
+  <view wx:if="{{error}}" class="error-line">{{error}}</view>
+  <button class="submit-button" disabled="{{submitting || uploading}}" bindtap="submit">{{submitting ? '发布中…' : '提交审核'}}</button>
+  <view class="foot-note">发布后需店主审核才会公开；请不要发布他人物品或违规内容。</view>
+</view>

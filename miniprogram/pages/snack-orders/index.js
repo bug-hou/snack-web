@@ -4,8 +4,9 @@ const { peekContext, loadContext } = require('../../utils/snack-context');
 const NEXT_STATUS = { pending: 'processing', processing: 'packed', packed: 'delivering', delivering: 'completed', confirmed: 'packed' };
 const NEXT_TEXT = { pending: '开始处理', processing: '配货完成', packed: '开始配送', delivering: '确认送达', confirmed: '配货完成' };
 const CONTACT_LABELS = { knock: '请敲门', call: '到达后打电话', no_knock: '不要敲门' };
-const PROGRESS = { pending: 0, processing: 1, confirmed: 1, packed: 2, delivering: 3, completed: 4, cancelled: -1 };
+const PROGRESS = { pending: 0, quoted: 0, processing: 1, confirmed: 1, packed: 2, delivering: 3, completed: 4, cancelled: -1 };
 const STEPS = ['已下单', '处理中', '已配货', '配送中', '已完成'];
+const SERVICE_SIZE = { small: '小件', large: '大件' };
 const FINISHED = ['completed', 'cancelled'];
 const POLL_ACTIVE_MS = 8000;
 const POLL_IDLE_MS = 30000;
@@ -81,6 +82,29 @@ Page({
       this.schedulePoll();
     }
   },
+  serviceView(order, ownerView) {
+    const orderType = order.orderType === 'express' || order.orderType === 'purchase' ? order.orderType : 'goods';
+    const fallback = { orderType: 'goods', kindText: '口袋便利铺', summaryText: '', serviceLines: [],
+      feeLabel: '上门配送费', feeText: `¥${order.deliveryFee || '0.00'}`, quoteText: '', canConfirmQuote: false };
+    if (orderType === 'express') {
+      const packages = order.packages || [];
+      return { ...fallback, orderType, kindText: '快递代取',
+        summaryText: `${order.station || '快递站点'} · ${packages.length}个包裹`,
+        serviceLines: packages.map((pkg, index) => ({ label: `包裹${index + 1}`, value: `取件码 ${pkg.code} · 尾号 ${pkg.phoneLast4} · ${SERVICE_SIZE[pkg.size] || '小件'}` })),
+        feeLabel: '代取跑腿费', feeText: `¥${order.serviceFee || '0.00'}` };
+    }
+    if (orderType === 'purchase') {
+      const items = order.purchaseItems || [];
+      return { ...fallback, orderType, kindText: '便利店代买',
+        summaryText: `${order.store || '京东便利店'} · ${items.length}项商品`,
+        serviceLines: items.map(item => ({ label: item.name, value: `×${item.quantity}${item.spec ? ` · ${item.spec}` : ''}` }))
+          .concat([{ label: '缺货替换', value: order.allowSubstitute ? '允许同类替换' : '不接受替换' }]),
+        feeLabel: '代买跑腿费', feeText: `¥${order.serviceFee || '0.00'}`,
+        quoteText: order.status === 'quoted' ? `店主报价商品 ¥${order.quote || '0.00'}，确认后开始代买` : (Number(order.quoteCents) > 0 ? `商品报价 ¥${order.quote || '0.00'}` : ''),
+        canConfirmQuote: !ownerView && order.status === 'quoted' };
+    }
+    return fallback;
+  },
   toViewOrder(order, ownerView) {
     const items = order.items || [];
     const count = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
@@ -93,7 +117,11 @@ Page({
       const product = products.find(p => p.id === line.id);
       return { id: line.id, name: line.name, initials: (line.name || '').slice(0, 2), image: product ? product.image : '', tone: product ? product.tone : 'peach' };
     });
+    const service = this.serviceView(order, ownerView);
     return {
+      orderType: service.orderType, kindText: service.kindText, summaryText: service.orderType === 'goods' ? '' : service.summaryText,
+      serviceLines: service.serviceLines, feeLabel: service.feeLabel, feeText: service.feeText,
+      quoteText: service.quoteText, canConfirmQuote: service.canConfirmQuote, productLines: lines,
       id: order.id, status: order.status, statusText: order.statusText,
       dateText: formatTime(order.createdAt),
       deliveryText: `${formatTime(order.createdAt)} 下单 · ${order.delivery || '尽快送达'}`,
@@ -154,6 +182,22 @@ Page({
     } finally { wx.hideLoading(); }
     this._signature = '';
     await this.loadOrders({ silent: true });
+  },
+  confirmQuote(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({ title: '确认报价', content: '确认后将按报价代买，送达后线下付款。', confirmText: '确认报价', confirmColor: '#34765B',
+      success: async result => {
+        if (!result.confirm) return;
+        try {
+          wx.showLoading({ title: '提交中', mask: true });
+          await callShop('confirmQuote', { id });
+          wx.showToast({ title: '已确认，开始代买', icon: 'success' });
+        } catch (error) {
+          wx.showToast({ title: error.message || '确认失败', icon: 'none' });
+        } finally { wx.hideLoading(); }
+        this._signature = '';
+        await this.loadOrders({ silent: true });
+      } });
   },
   toggleDetail(e) {
     const id = e.currentTarget.dataset.id;

@@ -1,0 +1,39 @@
+page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+button { padding: 0; margin: 0; font: inherit; line-height: normal; text-align: left; color: inherit; background: transparent; border: 0; border-radius: 0; overflow: visible; }
+button::after { border: none; }
+.errand-page { padding: 24rpx 32rpx calc(60rpx + env(safe-area-inset-bottom)); }
+.errand-head { margin-bottom: 24rpx; }
+.errand-title { font-size: 40rpx; font-weight: 800; }
+.errand-sub { font-size: 23rpx; color: #66736C; margin-top: 8rpx; }
+.open-note { display: inline-block; margin-top: 14rpx; padding: 8rpx 16rpx; border-radius: 20rpx; background: #F1E4D6; color: #8A5A33; font-size: 20rpx; }
+.open-note.on { background: #E6EEE1; color: #34765B; }
+.errand-message { padding: 60rpx 0; text-align: center; color: #69746B; font-size: 24rpx; }
+.card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 24rpx; margin-bottom: 20rpx; }
+.card-title { font-size: 27rpx; font-weight: 800; margin-bottom: 16rpx; }
+.hint { font-size: 20rpx; color: #8A938A; margin-bottom: 16rpx; line-height: 1.5; }
+.picker-line { display: flex; align-items: center; justify-content: space-between; min-height: 76rpx; padding: 0 20rpx; border-radius: 18rpx; background: #F4F6F1; }
+.picker-line.empty { color: #8A938A; }
+.picker-value { font-size: 24rpx; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.picker-arrow { color: #9AA49A; font-size: 32rpx; margin-left: 12rpx; }
+.field { display: flex; align-items: center; margin-top: 14rpx; }
+.label { width: 150rpx; flex-shrink: 0; font-size: 22rpx; color: #6B756C; }
+.input { flex: 1; min-width: 0; min-height: 76rpx; padding: 0 20rpx; border-radius: 18rpx; background: #F4F6F1; font-size: 24rpx; }
+.options { display: flex; margin-top: 14rpx; }
+.option { padding: 12rpx 28rpx; margin-right: 12rpx; border-radius: 30rpx; background: #ECEEE5; color: #5C685D; font-size: 22rpx; }
+.option.chosen { background: #34765B; color: #fff; }
+.package-block, .item-block { padding: 18rpx 0; border-top: 1rpx solid #EEF1EA; }
+.package-head, .item-head { display: flex; align-items: center; justify-content: space-between; font-size: 23rpx; font-weight: 700; margin-bottom: 6rpx; }
+.remove { color: #B4593A; font-size: 21rpx; padding: 8rpx 0; }
+.add-more { width: 100%; min-height: 80rpx; display: flex; align-items: center; justify-content: center; margin-top: 16rpx; border-radius: 18rpx; background: #EDF3E9; color: #34765B; font-size: 23rpx; font-weight: 700; }
+.switch-line { display: flex; align-items: center; justify-content: space-between; margin-top: 20rpx; font-size: 23rpx; }
+.switch { padding: 8rpx 20rpx; border-radius: 30rpx; background: #ECEEE5; color: #6B756C; font-size: 20rpx; }
+.switch.on { background: #34765B; color: #fff; }
+.textarea { width: 100%; box-sizing: border-box; min-height: 140rpx; padding: 18rpx 20rpx; border-radius: 18rpx; background: #F4F6F1; font-size: 24rpx; }
+.link-button { display: block; width: 100%; min-height: 70rpx; margin-top: 14rpx; color: #34765B; font-size: 22rpx; }
+.fee-card { background: #26352E; border-radius: 26rpx; padding: 26rpx; color: #fff; }
+.fee-row { display: flex; align-items: center; justify-content: space-between; font-size: 26rpx; font-weight: 700; }
+.fee-value { font-size: 36rpx; color: #F6D781; }
+.fee-rule { font-size: 20rpx; color: #C9D5CB; margin-top: 10rpx; line-height: 1.6; }
+.submit-button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 96rpx; margin-top: 28rpx; border-radius: 24rpx; background: #34765B; color: #fff; font-size: 28rpx; font-weight: 800; }
+.submit-button[disabled] { background: #B7C2B9; }
+.foot-note { text-align: center; color: #8A938A; font-size: 20rpx; margin-top: 20rpx; }

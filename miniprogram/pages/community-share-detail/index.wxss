@@ -1,0 +1,25 @@
+page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+button { padding: 0; margin: 0; font: inherit; line-height: normal; text-align: left; color: inherit; background: transparent; border: 0; border-radius: 0; overflow: visible; }
+button::after { border: none; }
+.detail-page { padding: 0 0 calc(60rpx + env(safe-area-inset-bottom)); }
+.detail-message { padding: 80rpx 0; text-align: center; color: #69746B; font-size: 24rpx; }
+.gallery { width: 100%; height: 560rpx; background: #EDEFE6; }
+.gallery-image { width: 100%; height: 100%; display: block; }
+.gallery-empty { height: 320rpx; display: flex; align-items: center; justify-content: center; color: #9AA49A; font-size: 24rpx; background: #EDEFE6; }
+.info-card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 26rpx; margin: 20rpx 32rpx 0; }
+.info-title { font-size: 32rpx; font-weight: 800; }
+.info-price { font-size: 38rpx; font-weight: 800; color: #AF441F; margin-top: 10rpx; }
+.info-tags { display: flex; flex-wrap: wrap; margin-top: 12rpx; }
+.tag { display: inline-block; padding: 6rpx 14rpx; margin-right: 10rpx; border-radius: 10rpx; background: #EDF3E9; color: #34765B; font-size: 19rpx; }
+.tag.mode { background: #FBE6D6; color: #8A5A33; }
+.tag.mine { background: #ECEEE5; color: #5C685D; }
+.info-desc { font-size: 24rpx; color: #4C5B50; margin-top: 16rpx; line-height: 1.7; }
+.row { display: flex; align-items: flex-start; }
+.row-label { width: 160rpx; flex-shrink: 0; font-size: 22rpx; color: #6B756C; }
+.row-value { flex: 1; min-width: 0; font-size: 24rpx; font-weight: 700; }
+.tip { font-size: 20rpx; color: #8A938A; margin-top: 14rpx; line-height: 1.6; }
+.owner-actions { display: flex; margin: 20rpx 32rpx 0; }
+.ghost-btn { flex: 1; min-height: 84rpx; margin-right: 12rpx; display: flex; align-items: center; justify-content: center; border-radius: 20rpx; background: #ECEEE5; color: #4C5B50; font-size: 23rpx; font-weight: 700; }
+.ghost-btn:last-child { margin-right: 0; }
+.share-btn { display: flex; align-items: center; justify-content: center; width: calc(100% - 64rpx); margin: 24rpx 32rpx 0; min-height: 92rpx; border-radius: 24rpx; background: #34765B; color: #fff; font-size: 27rpx; font-weight: 800; }
+.foot-note { text-align: center; color: #8A938A; font-size: 20rpx; margin-top: 18rpx; }

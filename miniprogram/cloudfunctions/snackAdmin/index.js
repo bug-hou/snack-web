@@ -8,19 +8,25 @@ const settingsCollection = db.collection('snack_shop_settings_v1');
 const products = db.collection('snack_products_v1');
 const orders = db.collection('snack_orders_v1');
 const addresses = db.collection('snack_addresses_v1');
+const shares = db.collection('snack_shares_v1');
 const _ = db.command;
 const $ = _.aggregate;
 const USER_PAGE_SIZE = 20;
 const USER_SCAN_LIMIT = 2000;
 const OPENID_PATTERN = /^[a-zA-Z0-9_-]{16,80}$/;
 const SETTINGS_ID = 'main';
-const STATUSES = { pending: '待处理', processing: '订单处理中', packed: '配货完成', delivering: '配送中', completed: '配送完成', cancelled: '已取消', confirmed: '订单处理中' };
-const NEXT = { pending: ['processing', 'cancelled'], processing: ['packed', 'cancelled'], packed: ['delivering', 'cancelled'], delivering: ['completed'], confirmed: ['packed', 'cancelled'] };
+const STATUSES = { pending: '待处理', quoted: '待确认报价', processing: '订单处理中', packed: '配货完成', delivering: '配送中', completed: '配送完成', cancelled: '已取消', confirmed: '订单处理中' };
+const NEXT = { pending: ['quoted', 'processing', 'cancelled'], quoted: ['processing', 'cancelled'], processing: ['packed', 'cancelled'], packed: ['delivering', 'cancelled'], delivering: ['completed'], confirmed: ['packed', 'cancelled'] };
+const SHARE_STATUS = { pending: '待审核', approved: '已公开', rejected: '未通过', off: '已下架', taken: '已转出' };
+const SHARE_MAX_STATIONS = 10;
 const CATEGORIES = ['fresh', 'household', 'dairy'];
 const PRODUCT_IMAGES = ['/images/products/eggs.jpg', '/images/products/tissue.jpg', '/images/products/milk.jpg'];
 const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-f0-9]{32}\.(jpg|png|webp)$/;
 const TONES = ['peach', 'cocoa', 'butter', 'sage', 'rose', 'mango', 'lemon', 'oat'];
-const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '' };
+const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '',
+  expressEnabled: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
+  purchaseEnabled: false, purchaseFeeCents: 500, purchaseStart: '09:00', purchaseEnd: '21:00', purchaseStore: '京东便利店',
+  secondhandEnabled: false };
 
 function text(value, max, label) {
   if (typeof value !== 'string' || !value.trim() || value.trim().length > max || /[\u0000-\u001f\u007f]/.test(value)) throw new Error(`${label}格式不正确`);
@@ -33,6 +39,14 @@ function cents(value, label, max) {
 function clock(value, label) {
   if (typeof value !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) throw new Error(`${label}时间不正确`);
   return value;
+}
+function stations(value) {
+  const raw = Array.isArray(value) ? value : String(value || '').split(/[\n,，]/);
+  const list = raw.map(item => String(item || '').trim()).filter(Boolean).slice(0, SHARE_MAX_STATIONS);
+  for (const item of list) {
+    if (item.length > 20 || /[\u0000-\u001f\u007f]/.test(item)) throw new Error('快递站点名称过长或格式不正确');
+  }
+  return list;
 }
 async function settings() {
   const { data } = await settingsCollection.doc(SETTINGS_ID).get().catch(() => ({ data: null }));
@@ -49,9 +63,23 @@ function checkedSettings(input) {
   if (ownerOpenid && !/^[a-zA-Z0-9_-]{16,80}$/.test(ownerOpenid)) throw new Error('店主微信身份格式不正确');
   const ownerWechat = typeof input.ownerWechat === 'string' ? input.ownerWechat.trim() : '';
   if (ownerWechat && !/^[a-zA-Z0-9_-]{3,40}$/.test(ownerWechat)) throw new Error('店主微信号格式不正确（3-40位字母、数字、下划线或减号）');
+  const expressStart = clock(input.expressStart, '代取开始');
+  const expressEnd = clock(input.expressEnd, '代取结束');
+  const purchaseStart = clock(input.purchaseStart, '代买开始');
+  const purchaseEnd = clock(input.purchaseEnd, '代买结束');
+  if (expressStart >= expressEnd || purchaseStart >= purchaseEnd) throw new Error('结束时间应晚于开始时间');
+  const purchaseStore = typeof input.purchaseStore === 'string' && input.purchaseStore.trim() ? text(input.purchaseStore, 20, '代买门店') : '京东便利店';
   return { ordersEnabled: input.ordersEnabled, businessStart, businessEnd, deliveryStart, deliveryEnd,
     deliveryFeeCents: cents(input.deliveryFeeCents, '配送费', 10000),
-    minOrderCents: cents(input.minOrderCents, '起送价', 1000000), ownerOpenid, ownerWechat };
+    minOrderCents: cents(input.minOrderCents, '起送价', 1000000), ownerOpenid, ownerWechat,
+    expressEnabled: input.expressEnabled === true,
+    expressBaseFeeCents: cents(input.expressBaseFeeCents, '代取基础跑腿费', 10000),
+    expressExtraFeeCents: cents(input.expressExtraFeeCents, '每多一件加价', 10000),
+    expressStart, expressEnd, expressStations: stations(input.expressStations),
+    purchaseEnabled: input.purchaseEnabled === true,
+    purchaseFeeCents: cents(input.purchaseFeeCents, '代买跑腿费', 10000),
+    purchaseStart, purchaseEnd, purchaseStore,
+    secondhandEnabled: input.secondhandEnabled === true };
 }
 function productInput(input) {
   const name = text(input.name, 40, '商品名称');
@@ -131,8 +159,45 @@ async function getUserDetail(input) {
   return {
     orders: orderResult.data.map(item => ({ ...item, statusText: STATUSES[item.status] || item.status })),
     addresses: addressResult.data.map(a => ({ id: a._id, label: a.label || '家', recipient: a.recipient, phone: a.phone,
-      building: a.building, room: a.room, contactPreference: a.contactPreference, updatedAt: a.updatedAt }))
+      building: a.building, room: a.room, contactPreference: a.contactPreference,
+      pickupPhoneLast4: typeof a.pickupPhoneLast4 === 'string' ? a.pickupPhoneLast4 : '', updatedAt: a.updatedAt }))
   };
+}
+async function listShares(input) {
+  const page = Number.isSafeInteger(input.page) && input.page >= 1 && input.page <= 100 ? input.page : 1;
+  const status = input.status ? text(input.status, 20, '物品状态') : '';
+  if (status && !SHARE_STATUS[status]) throw new Error('物品状态不正确');
+  const { data } = await shares.where(status ? { status } : {}).orderBy('createdAt', 'desc').skip((page - 1) * 20).limit(20).get();
+  return { list: data.map(item => ({ ...item, statusText: SHARE_STATUS[item.status] || item.status })), page, hasMore: data.length === 20 };
+}
+async function quoteOrder(input) {
+  const id = text(input.id, 40, '订单编号');
+  const quoteCents = input.quoteCents;
+  if (!/^[a-f0-9]{32}$/.test(id)) throw new Error('订单编号格式不正确');
+  if (!Number.isSafeInteger(quoteCents) || quoteCents < 0 || quoteCents > 1000000) throw new Error('商品报价不正确');
+  const quoteNote = typeof input.quoteNote === 'string' ? text(input.quoteNote, 100, '报价说明') : '';
+  const { data: existing } = await orders.doc(id).get().catch(() => ({ data: null }));
+  if (!existing) throw new Error('订单不存在');
+  if (existing.orderType !== 'purchase') throw new Error('仅代买订单需要报价');
+  if (!['pending', 'quoted'].includes(existing.status)) throw new Error('当前状态不可报价');
+  const serviceFeeCents = Number.isSafeInteger(existing.serviceFeeCents) ? existing.serviceFeeCents : 0;
+  const result = await orders.where({ _id: id, status: existing.status })
+    .update({ data: { status: 'quoted', quoteCents, quoteNote, totalCents: quoteCents + serviceFeeCents, updatedAt: Date.now() } });
+  if (!result.stats || result.stats.updated !== 1) throw new Error('订单状态已变化，请刷新重试');
+  return { id, status: 'quoted' };
+}
+async function reviewShare(input) {
+  const id = text(input.id, 40, '物品编号');
+  const status = text(input.status, 20, '审核结果');
+  if (!/^[a-f0-9]{32}$/.test(id) || !['approved', 'rejected'].includes(status)) throw new Error('审核参数不正确');
+  const reason = status === 'rejected' ? text(input.reason, 60, '未通过原因') : '';
+  const { data: existing } = await shares.doc(id).get().catch(() => ({ data: null }));
+  if (!existing) throw new Error('物品不存在');
+  if (!['pending', 'approved', 'rejected', 'off', 'taken'].includes(existing.status)) throw new Error('物品状态不正确');
+  const result = await shares.where({ _id: id, status: existing.status })
+    .update({ data: { status, rejectReason: reason, updatedAt: Date.now() } });
+  if (!result.stats || result.stats.updated !== 1) throw new Error('物品状态已变化，请刷新重试');
+  return { id, status };
 }
 async function changeStatus(input) {
   const id = text(input.id, 40, '订单编号');
@@ -174,6 +239,9 @@ exports.main = async (event, context) => {
       case 'changeStatus': return { ok: true, data: await changeStatus(input) };
       case 'getUsers': return { ok: true, data: await getUsers(input) };
       case 'getUserDetail': return { ok: true, data: await getUserDetail(input) };
+      case 'listShares': return { ok: true, data: await listShares(input) };
+      case 'reviewShare': return { ok: true, data: await reviewShare(input) };
+      case 'quoteOrder': return { ok: true, data: await quoteOrder(input) };
       case 'getProducts': {
         const { data } = await products.limit(100).get();
         return { ok: true, data: data.filter(item => item.archived !== true) };

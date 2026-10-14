@@ -1,7 +1,7 @@
 const { callShop } = require('../../utils/snack-cloud');
 const { getAddresses, selectAddress } = require('../../utils/snack-address');
 
-const emptyForm = () => ({ id: '', label: '家', recipient: '', phone: '', building: '', room: '', contactPreference: 'knock' });
+const emptyForm = () => ({ id: '', label: '家', recipient: '', phone: '', building: '', room: '', contactPreference: 'knock', pickupPhoneLast4: '' });
 Page({
   data: {
     list: [], selectedId: '', loading: true, saving: false, error: '', editing: false,
@@ -10,7 +10,10 @@ Page({
       { value: 'no_knock', label: '不要敲门' }
     ]
   },
-  onLoad(options) { this._from = options && options.from === 'checkout' ? 'checkout' : ''; },
+  onLoad(options) {
+    const from = options && options.from;
+    this._from = from === 'checkout' || from === 'errand' ? from : '';
+  },
   onShow() { this.loadAddresses(); },
   async loadAddresses() {
     this.setData({ loading: true, error: '' });
@@ -35,7 +38,7 @@ Page({
   closeForm() { this.setData({ editing: false, form: emptyForm(), error: '' }); },
   update(e) {
     const key = e.currentTarget.dataset.key;
-    if (['recipient', 'phone', 'room', 'label'].includes(key)) this.setData({ [`form.${key}`]: e.detail.value });
+    if (['recipient', 'phone', 'room', 'label', 'pickupPhoneLast4'].includes(key)) this.setData({ [`form.${key}`]: e.detail.value });
   },
   building(e) { this.setData({ 'form.building': e.currentTarget.dataset.value }); },
   preference(e) { this.setData({ 'form.contactPreference': e.currentTarget.dataset.value }); },
@@ -48,9 +51,13 @@ Page({
     if (!this.data.buildings.includes(f.building) || !/^[0-9A-Za-z\u4e00-\u9fa5-]{1,20}$/.test(f.room.trim())) {
       this.setData({ error: '请选择楼栋并填写门牌号' }); return;
     }
+    const pickupPhoneLast4 = (f.pickupPhoneLast4 || '').trim();
+    if (pickupPhoneLast4 && !/^\d{4}$/.test(pickupPhoneLast4)) {
+      this.setData({ error: '取件手机尾号需为4位数字' }); return;
+    }
     this.setData({ saving: true, error: '' });
     try {
-      const saved = await callShop('saveAddress', { ...f, recipient: f.recipient.trim(), phone: f.phone.trim(), room: f.room.trim() });
+      const saved = await callShop('saveAddress', { ...f, recipient: f.recipient.trim(), phone: f.phone.trim(), room: f.room.trim(), pickupPhoneLast4 });
       selectAddress(saved.id);
       this.setData({ editing: false, form: emptyForm() });
       await this.loadAddresses();
