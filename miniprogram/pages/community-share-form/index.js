@@ -30,9 +30,9 @@ Page({
         this.setData({ uploading: true, error: '' });
         try {
           for (const file of files) {
-            const ext = String(file.fileType || '').toLowerCase();
-            const name = IMAGE_TYPES[ext] || IMAGE_TYPES[String(ext).replace('.', '')];
-            if (!name) throw new Error('仅支持 JPG、PNG、WebP 图片');
+            // chooseMedia 不返回 fileType，从临时文件路径提取扩展名
+            const matched = String(file.tempFilePath || '').toLowerCase().match(/\.(jpe?g|png|webp)(\?|$)/);
+            const name = matched ? (matched[1] === 'jpeg' ? 'jpg' : matched[1]) : 'jpg';
             if (file.size > IMAGE_MAX_BYTES) throw new Error('单张图片不能超过 3MB');
             const uploaded = await wx.cloud.uploadFile({ cloudPath: `community/${randomId()}.${name}`, filePath: file.tempFilePath });
             if (!uploaded || !uploaded.fileID) throw new Error('图片上传失败，请重试');

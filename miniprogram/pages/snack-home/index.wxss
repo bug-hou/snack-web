@@ -1,5 +1,6 @@
 page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
-button { padding: 0; margin: 0; font: inherit; line-height: normal; text-align: left; color: inherit; background: transparent; border: 0; border-radius: 0; overflow: visible; }
+button { display: block; width: 100%; padding: 0; margin: 0; font: inherit; line-height: normal; text-align: left; color: inherit; background: transparent; border: 0; border-radius: 0; overflow: visible; }
+.header-orders, .section-link { width: auto; }
 button::after { border: none; }
 .community-page { min-height: 100vh; padding-bottom: calc(150rpx + env(safe-area-inset-bottom)); background: #F8F6F1; }
 .community-header { padding: 24rpx 32rpx 14rpx; display: flex; align-items: center; justify-content: space-between; }
@@ -54,6 +55,7 @@ button::after { border: none; }
 .share-mode { font-size: 17rpx; color: #34765B; }
 .share-price { font-size: 20rpx; font-weight: 700; color: #AF441F; }
 .sharing-card { display: flex; align-items: center; background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 24rpx; }
+.sharing-card:active { background: #F4F6F1; }
 .sharing-symbol { width: 66rpx; height: 66rpx; border-radius: 22rpx; background: #EDF3E9; display: flex; align-items: center; justify-content: center; margin-right: 18rpx; flex-shrink: 0; }
 .sharing-symbol image { width: 38rpx; height: 38rpx; }
 .sharing-copy { flex: 1; min-width: 0; }

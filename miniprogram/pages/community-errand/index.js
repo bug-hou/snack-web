@@ -35,6 +35,7 @@ Page({
       this.applyConfig(context);
       this.applyAddresses(addressResult);
       this.setData({ loading: false });
+      this._loaded = true;
     } catch (error) {
       this.setData({ loading: false, error: error.message || '加载失败，请下拉重试' });
     }
@@ -88,8 +89,13 @@ Page({
   removePackage(e) {
     const index = e.currentTarget.dataset.index;
     if (this.data.packages.length <= 1) return;
-    this.setData({ packages: this.data.packages.filter((_, i) => i !== index) });
-    this.recompute();
+    this.setData({ packages: this.data.packages.filter((_, i) => i !== index) }, () => this.recompute());
+  },
+  async onShow() {
+    // 从地址管理返回时刷新地址列表
+    if (this._loaded) {
+      try { this.applyAddresses(await getAddresses()); } catch (error) { /* 保留当前选择 */ }
+    }
   },
   addItem() {
     if (this.data.items.length >= 10) { wx.showToast({ title: '最多10项', icon: 'none' }); return; }

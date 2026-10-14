@@ -42,7 +42,7 @@
       </view>
 
       <view class="card-foot">
-        <view class="foot-sum"><text>共 {{item.count}} 件 · 合计</text><text class="foot-total">¥{{item.total}}</text></view>
+        <view class="foot-sum"><text>{{item.orderType === 'goods' ? '共 ' + item.count + ' 件 · 合计' : item.kindText + ' · 合计'}}</text><text class="foot-total">¥{{item.total}}</text></view>
         <view class="foot-actions">
           <view class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDetail">{{expandedId === item.id ? '收起详情' : '订单详情'}}</view>
           <view wx:if="{{item.canConfirmQuote}}" class="solid-btn" data-id="{{item.id}}" bindtap="confirmQuote">确认报价</view>

@@ -46,7 +46,7 @@
         </view>
       </view>
     </block>
-    <view wx:else class="sharing-card">
+    <view wx:else class="sharing-card" bindtap="loadShares">
       <view class="sharing-symbol"><image src="/images/community/repeat-2.svg"/></view>
       <view class="sharing-copy"><view class="sharing-title">让好物，在小区里接力</view><view class="sharing-desc">{{shareHint}}</view></view>
     </view>

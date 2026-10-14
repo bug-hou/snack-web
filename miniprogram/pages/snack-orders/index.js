@@ -134,7 +134,7 @@ Page({
       moreCount: Math.max(0, items.length - 3),
       progress: PROGRESS[order.status],
       steps: STEPS,
-      stepText: PROGRESS[order.status] >= 0 ? STEPS[PROGRESS[order.status]] : '订单已取消',
+      stepText: order.status === 'quoted' ? '待确认报价' : PROGRESS[order.status] >= 0 ? STEPS[PROGRESS[order.status]] : '订单已取消',
       nextStatus: NEXT_STATUS[order.status] || '',
       nextText: NEXT_TEXT[order.status] || '',
       canCancel: !ownerView && order.status === 'pending',
