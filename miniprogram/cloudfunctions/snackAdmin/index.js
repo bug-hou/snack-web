@@ -9,6 +9,8 @@ const products = db.collection('snack_products_v1');
 const orders = db.collection('snack_orders_v1');
 const addresses = db.collection('snack_addresses_v1');
 const shares = db.collection('snack_shares_v1');
+const posts = db.collection('snack_posts_v1');
+const comments = db.collection('snack_comments_v1');
 const _ = db.command;
 // 社区相关表（shares / posts / comments）可能是后加的，首次调用时按需补建
 const COLLECTION_NAMES = ['snack_shop_settings_v1', 'snack_products_v1', 'snack_orders_v1',
@@ -35,9 +37,14 @@ const SHARE_STATUS = { pending: '待审核', approved: '已公开', rejected: '�
 const SHARE_MAX_STATIONS = 10;
 const CATEGORIES = ['fresh', 'household', 'dairy'];
 const PRODUCT_IMAGES = ['/images/products/eggs.jpg', '/images/products/tissue.jpg', '/images/products/milk.jpg'];
-// 商品图统一存放在云开发存储（COS）的 products/ 目录，旧数据在库里仍是本地路径，保留白名单兼容
-const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-zA-Z0-9._-]{1,80}\.(jpg|png|webp)$/;
+// 商品图统一存放在云开发存储（COS）的 products/ 目录，旧数据在库里仍是本地路径，保留白名单兼容。
+// Web 端上传时会先压缩再写盘，文件名由前端生成，这里只约束「目录 + 扩展名」，不再限制长度与字符形态
+const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-zA-Z0-9._-]{1,120}\.(jpg|jpeg|png|webp)$/;
 const TONES = ['peach', 'cocoa', 'butter', 'sage', 'rose', 'mango', 'lemon', 'oat'];
+const FORUM_BOARDS = ['chat', 'help', 'lost', 'notice'];
+const FORUM_BOARD_TEXT = { chat: '邻里闲聊', help: '互帮互助', lost: '失物招领', notice: '社区公告' };
+const HEX32 = /^[a-f0-9]{32}$/;
+const ID_SAFE = /^[a-zA-Z0-9_-]{1,40}$/;
 const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '',
   expressEnabled: false, expressFollowShop: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressLargeFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
   purchaseEnabled: false, purchaseFeeCents: 500, purchaseStart: '09:00', purchaseEnd: '21:00', purchaseStore: '京东便利店',
@@ -117,14 +124,28 @@ function productInput(input) {
   const image = input.image ? text(input.image, 300, '商品图片') : '';
   if (image && !PRODUCT_IMAGES.includes(image) && !UPLOADED_IMAGE.test(image)) throw new Error('商品图片不正确，请重新上传');
   return { name, spec, category, priceCents, label, tone, image, initials: name.slice(0, 2),
-    is_available: input.is_available, featured: input.featured, updatedAt: Date.now() };
+    is_available: input.is_available, featured: input.featured, archived: false, updatedAt: Date.now() };
+}
+// 删除商品只做归档：历史订单仍按 id 引用商品，物理删除会导致订单明细无法展示
+async function deleteProduct(input) {
+  const id = text(input.id, 40, '商品编号');
+  if (!ID_SAFE.test(id)) throw new Error('商品编号格式不正确');
+  const { data } = await products.doc(id).get().catch(() => ({ data: null }));
+  if (!data) throw new Error('商品不存在');
+  await products.doc(id).update({ data: { archived: true, is_available: false, updatedAt: Date.now() } });
+  return { id };
 }
 async function getOrders(input) {
   const page = Number.isSafeInteger(input.page) && input.page >= 1 && input.page <= 100 ? input.page : 1;
   const status = input.status ? text(input.status, 20, '订单状态') : '';
   if (status && !STATUSES[status]) throw new Error('订单状态不正确');
-  let query = orders.where(status ? { status } : {});
-  const { data } = await query.orderBy('createdAt', 'desc').skip((page - 1) * 20).limit(20).get();
+  const type = ['goods', 'express', 'purchase'].includes(input.type) ? input.type : '';
+  const where = {};
+  if (status) where.status = status;
+  // 现货订单早期没有 orderType 字段，用 nin 排除两种服务单即可
+  if (type === 'express' || type === 'purchase') where.orderType = type;
+  else if (type === 'goods') where.orderType = _.nin(['express', 'purchase']);
+  const { data } = await orders.where(where).orderBy('createdAt', 'desc').skip((page - 1) * 20).limit(20).get();
   return { list: data.map(item => ({ ...item, statusText: STATUSES[item.status] || item.status })), page, hasMore: data.length === 20 };
 }
 // 用户来源于下过单或保存过地址的顾客；按最近活跃时间排序，支持按姓名/手机号/门牌搜索
@@ -248,31 +269,119 @@ async function saveProduct(input) {
   await products.add({ data: { _id: id, ...product, createdAt: Date.now() } });
   return { id };
 }
+// 闲置：除了上下架，也允许彻底删除（含图片引用一并丢弃）
+async function deleteShare(input) {
+  const id = text(input.id, 40, '物品编号');
+  if (!HEX32.test(id)) throw new Error('物品编号格式不正确');
+  const { data } = await shares.doc(id).get().catch(() => ({ data: null }));
+  if (!data) throw new Error('物品不存在');
+  await shares.doc(id).remove();
+  return { id };
+}
+async function listPosts(input) {
+  const page = Number.isSafeInteger(input.page) && input.page >= 1 && input.page <= 100 ? input.page : 1;
+  const board = input.board ? text(input.board, 12, '板块') : '';
+  if (board && !FORUM_BOARDS.includes(board)) throw new Error('板块不正确');
+  const keyword = typeof input.keyword === 'string' ? input.keyword.trim().toLowerCase().slice(0, 40) : '';
+  const where = board ? { board } : {};
+  // 关键词只能内存匹配：先取一页，再在页内过滤，保证接口稳定且不会全表扫描
+  const { data } = await posts.where(where).orderBy('createdAt', 'desc').skip((page - 1) * 20).limit(20).get();
+  let list = data.map(item => ({ ...item, boardText: FORUM_BOARD_TEXT[item.board] || item.board }));
+  if (keyword) {
+    list = list.filter(item => [item.title, item.content, item.authorAlias].some(v => String(v || '').toLowerCase().includes(keyword)));
+  }
+  return { list, page, hasMore: data.length === 20 };
+}
+async function deletePost(input) {
+  const id = text(input.id, 40, '帖子编号');
+  if (!HEX32.test(id)) throw new Error('帖子编号格式不正确');
+  const { data } = await posts.doc(id).get().catch(() => ({ data: null }));
+  if (!data) throw new Error('帖子不存在或已删除');
+  await posts.doc(id).remove();
+  await comments.where({ postId: id }).remove().catch(() => ({}));
+  return { id };
+}
+async function listComments(input) {
+  const postId = text(input.postId, 40, '帖子编号');
+  if (!HEX32.test(postId)) throw new Error('帖子编号格式不正确');
+  const { data } = await comments.where({ postId }).orderBy('createdAt', 'asc').limit(100).get();
+  return data.map(item => ({ id: item._id, postId, content: item.content, author: item.authorAlias || '邻居', createdAt: item.createdAt }));
+}
+async function deleteComment(input) {
+  const id = text(input.id, 40, '评论编号');
+  if (!HEX32.test(id)) throw new Error('评论编号格式不正确');
+  const { data } = await comments.doc(id).get().catch(() => ({ data: null }));
+  if (!data) throw new Error('评论不存在或已删除');
+  await comments.doc(id).remove();
+  await posts.doc(data.postId).update({ data: { commentCount: _.inc(-1) } }).catch(() => ({}));
+  return { id };
+}
+// 北京时间当天 00:00 的时间戳，用于「今日订单」统计
+function todayStartMs() {
+  const shifted = new Date(Date.now() + 8 * 60 * 60 * 1000);
+  const start = Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate());
+  return start - 8 * 60 * 60 * 1000;
+}
+async function dashboardStats() {
+  const since = todayStartMs();
+  const [pending, today, productCount, shareCount, postCount, users] = await Promise.all([
+    orders.where({ status: 'pending' }).count().catch(() => ({ total: 0 })),
+    orders.where({ createdAt: _.gte(since) }).count().catch(() => ({ total: 0 })),
+    products.where({ archived: _.neq(true) }).count().catch(() => ({ total: 0 })),
+    shares.where({ status: 'approved' }).count().catch(() => ({ total: 0 })),
+    posts.count().catch(() => ({ total: 0 })),
+    getUsers({ page: 1 }).catch(() => ({ total: 0 }))
+  ]);
+  let todayRevenueCents = 0;
+  try {
+    const { data } = await orders.where({ createdAt: _.gte(since), status: _.neq('cancelled') }).limit(200).get();
+    todayRevenueCents = data.reduce((sum, item) => sum + (Number.isSafeInteger(item.totalCents) ? item.totalCents : 0), 0);
+  } catch (error) { /* 统计失败不影响主流程 */ }
+  return { pendingCount: pending.total || 0, todayCount: today.total || 0, todayRevenueCents,
+    productCount: productCount.total || 0, shareCount: shareCount.total || 0,
+    postCount: postCount.total || 0, userCount: users.total || 0 };
+}
 
 exports.main = async (event, context) => {
   try {
-    const trustedUid = auth.getUserInfo()?.uid;
-    const contextUid = context && context.userInfo && context.userInfo.uid;
-    if (!trustedUid || (contextUid && trustedUid !== contextUid) ||
-        !process.env.SHOP_ADMIN_UID || trustedUid !== process.env.SHOP_ADMIN_UID) {
-      return { ok: false, message: '无权访问商家管理' };
+    // 不同调用链路（Web SDK / 云调用）把登录身份放在不同位置，这里一并取，取到任意一个可信来源即可
+    let trustedUid = '';
+    try { trustedUid = (auth.getUserInfo && auth.getUserInfo())?.uid || ''; } catch (e) { /* 忽略，走 context 兜底 */ }
+    if (!trustedUid && context) {
+      const info = context.userInfo || {};
+      trustedUid = info.uid || info.userId || (context.cloudbaseContext && context.cloudbaseContext.uid) || '';
+    }
+    if (!trustedUid) return { ok: false, message: '请先登录商家账号' };
+    if (!process.env.SHOP_ADMIN_UID) return { ok: false, message: '云函数未配置 SHOP_ADMIN_UID，请联系开发者设置环境变量' };
+    if (trustedUid !== process.env.SHOP_ADMIN_UID) {
+      return { ok: false, message: `无权访问商家管理（当前账号 UID ${trustedUid}，与 SHOP_ADMIN_UID 不一致）` };
     }
     const input = event && event.data && typeof event.data === 'object' ? event.data : {};
     await ensureCollections();
     switch (event && event.action) {
-      case 'getDashboard': return { ok: true, data: { settings: await settings() } };
+      case 'getDashboard': {
+        const current = await settings();
+        return { ok: true, data: { settings: current, stats: await dashboardStats() } };
+      }
+      case 'getStats': return { ok: true, data: await dashboardStats() };
       case 'getOrders': return { ok: true, data: await getOrders(input) };
       case 'changeStatus': return { ok: true, data: await changeStatus(input) };
       case 'getUsers': return { ok: true, data: await getUsers(input) };
       case 'getUserDetail': return { ok: true, data: await getUserDetail(input) };
       case 'listShares': return { ok: true, data: await listShares(input) };
       case 'reviewShare': return { ok: true, data: await reviewShare(input) };
+      case 'deleteShare': return { ok: true, data: await deleteShare(input) };
       case 'quoteOrder': return { ok: true, data: await quoteOrder(input) };
       case 'getProducts': {
         const { data } = await products.limit(100).get();
         return { ok: true, data: data.filter(item => item.archived !== true) };
       }
       case 'saveProduct': return { ok: true, data: await saveProduct(input) };
+      case 'deleteProduct': return { ok: true, data: await deleteProduct(input) };
+      case 'listPosts': return { ok: true, data: await listPosts(input) };
+      case 'deletePost': return { ok: true, data: await deletePost(input) };
+      case 'listComments': return { ok: true, data: await listComments(input) };
+      case 'deleteComment': return { ok: true, data: await deleteComment(input) };
       case 'saveSettings': {
         const next = checkedSettings(input);
         const { data } = await settingsCollection.doc(SETTINGS_ID).get().catch(() => ({ data: null }));
@@ -280,7 +389,7 @@ exports.main = async (event, context) => {
         else await settingsCollection.add({ data: { _id: SETTINGS_ID, ...next } });
         return { ok: true, data: next };
       }
-      default: return { ok: false, message: '不支持的操作' };
+      default: return { ok: false, code: 'UNSUPPORTED_ACTION', message: `不支持的操作：${event && event.action}（请重新部署 snackAdmin 云函数）` };
     }
   } catch (error) {
     console.error('snackAdmin failed', event && event.action, error);
