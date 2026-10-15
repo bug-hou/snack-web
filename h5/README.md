@@ -62,6 +62,30 @@ npm run build:upload     # 构建并把 edgeone.json 复制进 dist/
 仓库根目录选 `h5/`，`edgeone.json` 已配置构建命令 `npm run build`、输出目录 `dist`、
 Node 20.18.0。环境变量在 Makers「项目设置 → 环境变量」里添加，保存后需重新部署。
 
+### 方式三：CloudBase 静态托管（tcb CLI）
+
+构建产物可以直接传到云开发自带的静态托管，部署后的域名默认已在安全域名白名单里：
+
+```bash
+# 部署目录已经指向 h5/ 时（cwd 就是 h5）
+npm ci && npm run build && tcb hosting deploy ./dist snack-h5 -e cloud1-d9gvn0kkg13217e4e
+```
+
+从仓库根目录执行的话要先进目录：
+
+```bash
+cd h5 && npm ci && npm run build && tcb hosting deploy ./dist snack-h5 -e cloud1-d9gvn0kkg13217e4e
+```
+
+注意两点：
+
+- `dist` 由 `npm run build` 生成，必须先安装依赖再构建，直接 `tcb hosting deploy ./dist` 会报
+  `Path does not exist`
+- 路径是相对当前工作目录的，部署目录已经设为 `h5` 时不要再写成 `./h5/dist`
+- 环境变量来自仓库里的 `.env.production`（只有环境 ID，无密钥），CI 上不需要额外配置
+
+访问地址：`https://<静态托管默认域名>/snack-h5/#/`（hash 路由，子目录部署无需额外改写规则）。
+
 ## 部署后必做的三项配置
 
 1. **WEB 安全域名**：CloudBase 控制台 → 环境 → 安全配置 → WEB 安全域名，
