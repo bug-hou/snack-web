@@ -1,10 +1,12 @@
 <view class="community-page">
   <view class="community-header">
     <view class="community-brand"><view class="brand-mark">里</view><view><view class="brand-name">爱尚里生活</view><view class="brand-kicker">家门口的小事，一起办好</view></view></view>
-    <view aria-role="button" class="header-orders" bindtap="goOrders" aria-label="查看我的订单"><image src="/images/community/clipboard-list.svg"/><text>我的订单</text></view>
+    <view aria-role="button" class="header-orders" bindtap="goOrders" aria-label="查看我的需求登记"><image src="/images/community/clipboard-list.svg"/><text>我的登记</text></view>
   </view>
 
   <view class="shop-content">
+    <view class="compliance-banner">本页为社区便民信息展示，只提供商品信息与参考价，不提供在线下单、在线支付与交易担保。有需要请先加入需求清单，再由店家线下与您确认。</view>
+
     <view aria-role="button" class="address-entry" bindtap="goAddress" aria-label="管理收货地址">
       <image class="address-pin" src="/images/community/map-pin.svg"/>
       <view class="address-copy"><view class="address-current">{{addressText}}</view><view class="address-sub">{{addressHint}}</view></view>
@@ -55,8 +57,16 @@
     </view>
     <view aria-role="button" class="publish-button" bindtap="goPublish"><image src="/images/community/plus.svg"/><text>发布闲置</text></view>
 
+    <view class="section-head">
+      <view><view class="section-eyebrow">NEIGHBOUR TALK</view><view class="section-name">邻里广场</view></view>
+    </view>
+    <view aria-role="button" class="forum-entry" bindtap="goForum" hover-class="forum-entry-pressed">
+      <view class="forum-entry-copy"><view class="forum-entry-title">和邻居聊两句</view><view class="forum-entry-desc">闲聊 · 互助求助 · 失物招领 · 社区公告</view></view>
+      <text class="forum-entry-arrow">›</text>
+    </view>
+
     <view id="community-catalog" class="section-head catalog-head">
-      <view><view class="section-eyebrow">DAILY ESSENTIALS</view><view class="section-name">便利铺现货</view></view>
+      <view><view class="section-eyebrow">DAILY ESSENTIALS</view><view class="section-name">便利铺 · 商品信息</view></view>
       <text wx:if="{{shopStatus}}" class="shop-state">{{shopStatus}}</text>
     </view>
     <view class="catalog-caption">原口袋便利铺商品 · 与便利店代买服务分开</view>
@@ -64,7 +74,7 @@
       <view wx:for="{{featured}}" wx:key="id" class="featured-item">
         <view class="featured-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="featured-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="mini-pack"><text>{{item.initials}}</text></view></view>
         <view class="featured-label">{{item.name}}</view>
-        <view class="featured-price">¥{{item.price}} <view aria-role="button" class="featured-add" data-id="{{item.id}}" bindtap="add" aria-label="加入购物车">＋</view></view>
+        <view class="featured-price">¥{{item.price}} <view aria-role="button" class="featured-add" data-id="{{item.id}}" bindtap="add" aria-label="加入需求清单">＋</view></view>
       </view>
     </scroll-view>
     <view class="search-box"><view class="search-icon"></view><input class="search-input" value="{{keyword}}" placeholder="搜索鸡蛋、牛奶、日用品" placeholder-class="search-placeholder" bindinput="onSearch" confirm-type="search"/><text wx:if="{{keyword}}" class="clear-search" bindtap="clearSearch">清除</text></view>
@@ -73,8 +83,10 @@
       <view wx:for="{{products}}" wx:key="id" class="product-card">
         <view class="product-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="product-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="product-pack"><view class="pack-name">{{item.initials}}</view></view><view wx:if="{{item.label}}" class="product-tag">{{item.label}}</view></view>
         <view class="product-name">{{item.name}}</view><view class="product-spec">{{item.spec}}</view>
-        <view class="product-bottom"><view class="product-price"><text>¥</text>{{item.price}}</view><view class="qty-controls"><view wx:if="{{item.quantity}}" class="qty-minus" data-id="{{item.id}}" bindtap="reduce">－</view><text wx:if="{{item.quantity}}" class="qty-value">{{item.quantity}}</text><view class="qty-plus" data-id="{{item.id}}" bindtap="add">＋</view></view></view>
-        <view class="buy-now" data-id="{{item.id}}" bindtap="buyNow">立即购买</view>
+        <view class="product-price-row"><view class="product-price"><text>¥</text>{{item.price}}</view><text class="price-note">参考价</text></view>
+        <view class="qty-controls"><view wx:if="{{item.quantity}}" class="qty-minus" data-id="{{item.id}}" bindtap="reduce">－</view><text wx:if="{{item.quantity}}" class="qty-value">{{item.quantity}}</text><view class="qty-plus" data-id="{{item.id}}" bindtap="add" aria-label="加入需求清单">＋</view></view>
+        <view wx:if="{{!item.quantity}}" class="want-hint">需要就点 ＋，先记在清单里</view>
+        <view wx:else class="want-hint in-list">已在需求清单 · 数量 {{item.quantity}}</view>
       </view>
     </view>
     <view wx:if="{{loading}}" class="empty-results">正在加载商品…</view>
@@ -83,5 +95,5 @@
     <view class="bottom-note">保利爱尚里 · 爱尚里生活</view>
   </view>
 
-  <view wx:if="{{count}}" class="floating-cart" bindtap="openCart"><view><view class="floating-count">已选 {{count}} 件</view><view class="floating-price">合计 ¥{{total}}</view></view><view class="floating-button">查看购物车　→</view></view>
+  <view wx:if="{{count}}" class="floating-cart" bindtap="openCart"><view><view class="floating-count">清单 {{count}} 件</view><view class="floating-price">参考 ¥{{total}}</view></view><view class="floating-button">查看需求清单　→</view></view>
 </view>

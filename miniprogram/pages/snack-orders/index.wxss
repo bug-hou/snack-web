@@ -3,6 +3,7 @@
 .orders-head { padding: 16rpx 4rpx 24rpx; }
 .orders-title { font-size: 40rpx; font-weight: 800; }
 .orders-sub { margin-top: 8rpx; font-size: 22rpx; color: #66736C; }
+.compliance-banner { margin-bottom: 18rpx; padding: 16rpx 20rpx; border-radius: 18rpx; background: #F1EFE5; color: #6C766B; font-size: 19rpx; line-height: 1.6; }
 
 .wechat-tip { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; background: #FBE6D6; color: #8A5A33; border-radius: 18rpx; padding: 18rpx 22rpx; margin-bottom: 16rpx; font-size: 22rpx; line-height: 1.6; }
 .wechat-tip-text { flex: 1; min-width: 0; }

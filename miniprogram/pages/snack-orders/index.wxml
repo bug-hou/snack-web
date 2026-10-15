@@ -1,8 +1,9 @@
 <view class="orders-wrap">
   <view class="orders-head">
-    <view class="orders-title">我的订单</view>
-    <view class="orders-sub">{{ownerView ? '店主工作台 · 可更新顾客订单进度' : '查看下单、配货与配送进度'}}</view>
+    <view class="orders-title">我的需求</view>
+    <view class="orders-sub">{{ownerView ? '店主工作台 · 可更新邻居需求的处理进度' : '查看需求登记、备货与送达进度'}}</view>
   </view>
+  <view class="compliance-banner">这里记录您提交的需求登记，仅用于进度沟通，不涉及在线支付；实际商品与费用请在线下当面确认。</view>
 
   <view wx:if="{{ownerWechat && !ownerView}}" class="wechat-tip" bindtap="copyWechat">
     <view class="wechat-tip-text">订单有疑问？添加店主微信 <text class="wechat-id">{{ownerWechat}}</text> 方便沟通</view>
@@ -14,7 +15,7 @@
     <view wx:for="{{tabs}}" wx:key="id" class="order-tab {{activeTab === item.id ? 'current' : ''}}" data-tab="{{item.id}}" bindtap="selectTab"><text>{{item.name}}</text></view>
   </scroll-view>
 
-  <view wx:if="{{loading}}" class="order-message">订单加载中…</view>
+  <view wx:if="{{loading}}" class="order-message">正在加载…</view>
   <view wx:elif="{{error}}" class="order-message"><view>{{error}}</view><view class="retry" bindtap="loadOrders">点击重试</view></view>
 
   <block wx:elif="{{filteredOrders.length}}">
@@ -44,7 +45,7 @@
       <view class="card-foot">
         <view class="foot-sum"><text>{{item.orderType === 'goods' ? '共 ' + item.count + ' 件 · 合计' : item.kindText + ' · 合计'}}</text><text class="foot-total">¥{{item.total}}</text></view>
         <view class="foot-actions">
-          <view class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDetail">{{expandedId === item.id ? '收起详情' : '订单详情'}}</view>
+          <view class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDetail">{{expandedId === item.id ? '收起详情' : '查看详情'}}</view>
           <view wx:if="{{item.canConfirmQuote}}" class="solid-btn" data-id="{{item.id}}" bindtap="confirmQuote">确认报价</view>
           <view wx:if="{{item.canCancel}}" class="ghost-btn" data-id="{{item.id}}" bindtap="cancel">取消订单</view>
           <view wx:if="{{item.canDelete}}" class="ghost-btn" data-id="{{item.id}}" bindtap="remove">删除订单</view>
@@ -53,7 +54,7 @@
       </view>
 
       <view wx:if="{{expandedId === item.id}}" class="card-detail">
-        <view class="detail-row"><text class="detail-label">订单编号</text><text class="detail-value break">{{item.id}}</text></view>
+        <view class="detail-row"><text class="detail-label">登记编号</text><text class="detail-value break">{{item.id}}</text></view>
         <view class="detail-row"><text class="detail-label">收货信息</text><text class="detail-value">{{item.recipient}} · {{item.phone}}</text></view>
         <view class="detail-row"><text class="detail-label">送达地址</text><text class="detail-value">{{item.address}}</text></view>
         <view class="detail-row"><text class="detail-label">送达方式</text><text class="detail-value">{{item.contactText}} · {{item.delivery}}</text></view>
@@ -70,11 +71,11 @@
           <view wx:if="{{item.orderType === 'purchase' && item.quoteText}}" class="detail-row sum"><text class="detail-label">商品报价</text><text class="detail-value">{{item.quoteText}}</text></view>
           <view class="detail-row sum"><text class="detail-label">{{item.feeLabel}}</text><text class="detail-value">{{item.feeText}}</text></view>
         </block>
-        <view class="detail-row sum total"><text class="detail-label">订单合计 · 货到付款</text><text class="detail-value">¥{{item.total}}</text></view>
+        <view class="detail-row sum total"><text class="detail-label">参考合计 · 线下结算</text><text class="detail-value">¥{{item.total}}</text></view>
       </view>
     </view>
-    <view class="order-bottom">已显示最近 {{filteredOrders.length}} 条订单 · 状态自动更新</view>
+    <view class="order-bottom">已显示最近 {{filteredOrders.length}} 条登记 · 进度自动更新</view>
   </block>
 
-  <view wx:else class="order-empty"><view class="empty-art"><view class="empty-pack">SOON</view></view><view class="empty-heading">还没有相关订单</view><view class="empty-copy">{{ownerView ? '收到新订单后，您可以在这里更新配货和配送进度。' : '选好所需商品，订单会在这里显示处理和配送进度。'}}</view><view class="primary-action empty-action" bindtap="goShop">去选购　→</view></view>
+  <view wx:else class="order-empty"><view class="empty-art"><view class="empty-pack">SOON</view></view><view class="empty-heading">还没有相关登记</view><view class="empty-copy">{{ownerView ? '收到新的需求登记后，您可以在这里更新备货和送达进度。' : '把想要的商品记进清单并登记后，进度会显示在这里。'}}</view><view class="primary-action empty-action" bindtap="goShop">去逛便利铺　→</view></view>
 </view>

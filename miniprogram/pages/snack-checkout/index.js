@@ -18,7 +18,7 @@ Page({
     timeRange: [[], [], []], timeIndex: [0, 0, 0], deliveryAt: 0, deliveryText: '尽快送达',
     ordersEnabled: false, submitting: false, loading: true, loadError: '', directPurchase: false, configReady: false,
     deliveryFee: '0.00', payable: '0.00', minOrder: '0.00', belowMinimum: false, canOrder: false,
-    shopNotice: '小店暂未营业，当前无法提交订单。'
+    shopNotice: '小店暂未营业，当前无法登记需求。'
   },
   onLoad(options) { this._productId = options && options.productId ? decodeURIComponent(options.productId) : ''; },
   getSelection() {
@@ -66,8 +66,8 @@ Page({
       minOrder: (minimum / 100).toFixed(2), belowMinimum: subtotal < minimum,
       canOrder: open && subtotal >= minimum && !!this.data.selectedAddress,
       shopNotice: config.ordersEnabled
-        ? `营业 ${config.businessStart}—${config.businessEnd}，配送 ${config.deliveryStart}—${config.deliveryEnd}。仅在两个时段内接受订单。`
-        : '小店暂未营业，当前无法提交订单。'
+        ? `营业 ${config.businessStart}—${config.businessEnd}，配送 ${config.deliveryStart}—${config.deliveryEnd}。仅在两个时段内接受需求登记。`
+        : '小店暂未营业，当前无法登记需求。'
     });
   },
 
@@ -130,7 +130,7 @@ Page({
       return;
     }
     if (!this.data.ordersEnabled) {
-      wx.showModal({ title: '暂时无法下单', content: this.data.shopNotice, showCancel: false });
+      wx.showModal({ title: '暂时无法登记', content: this.data.shopNotice, showCancel: false });
       return;
     }
     if (this.data.belowMinimum) {
@@ -156,10 +156,10 @@ Page({
       });
       this._requestId = null;
       if (!this._productId) cart.clear();
-      wx.showModal({ title: '下单成功', content: `订单合计 ¥${order.total}（含配送费 ¥${order.deliveryFee}）。配货完成后送往家门口，送达时线下付款。`,
-        showCancel: false, success: () => wx.switchTab({ url: '/pages/snack-orders/index' }) });
+      wx.showModal({ title: '需求已登记', content: `参考合计 ¥${order.total}（含配送费 ¥${order.deliveryFee}）。店家会按登记内容线下与您确认，送达后当面结算，本小程序不收款。`,
+        showCancel: false, success: () => wx.redirectTo({ url: '/pages/snack-orders/index' }) });
     } catch (error) {
-      wx.showToast({ title: error.message || '下单失败，请稍后重试', icon: 'none' });
+      wx.showToast({ title: error.message || '登记失败，请稍后重试', icon: 'none' });
     } finally {
       this.setData({ submitting: false });
     }

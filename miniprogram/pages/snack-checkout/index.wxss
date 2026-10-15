@@ -1,5 +1,6 @@
 @import "../../styles/snack.wxss";
 .checkout-page { padding-bottom: 240rpx; }
+.compliance-banner { margin-bottom: 20rpx; padding: 16rpx 20rpx; border-radius: 18rpx; background: #F1EFE5; color: #6C766B; font-size: 19rpx; line-height: 1.6; }
 .preview-warning { background: #FBE6D6; color: #8A5A33; border-radius: 18rpx; padding: 20rpx 22rpx; font-size: 22rpx; line-height: 1.55; margin-bottom: 20rpx; }
 .form-card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 6rpx 26rpx 20rpx; margin-bottom: 18rpx; }
 .form-heading { font-size: 27rpx; font-weight: 800; padding: 26rpx 0 10rpx; display: flex; align-items: center; gap: 14rpx; }

@@ -1,6 +1,9 @@
 {
   "pages": [
     "pages/snack-home/index",
+    "pages/community-forum/index",
+    "pages/community-forum-post/index",
+    "pages/community-forum-detail/index",
     "pages/snack-cart/index",
     "pages/snack-checkout/index",
     "pages/snack-address/index",
@@ -26,10 +29,24 @@
     "borderStyle": "white",
     "backgroundColor": "#FFFFFF",
     "list": [
-      { "pagePath": "pages/snack-home/index", "text": "社区" },
-      { "pagePath": "pages/snack-cart/index", "text": "购物车" },
-      { "pagePath": "pages/snack-orders/index", "text": "订单" },
-      { "pagePath": "pages/snack-profile/index", "text": "我的" }
+      {
+        "pagePath": "pages/snack-home/index",
+        "text": "社区",
+        "iconPath": "images/tabbar/community.png",
+        "selectedIconPath": "images/tabbar/community_on.png"
+      },
+      {
+        "pagePath": "pages/community-forum/index",
+        "text": "广场",
+        "iconPath": "images/tabbar/forum.png",
+        "selectedIconPath": "images/tabbar/forum_on.png"
+      },
+      {
+        "pagePath": "pages/snack-profile/index",
+        "text": "我的",
+        "iconPath": "images/tabbar/profile.png",
+        "selectedIconPath": "images/tabbar/profile_on.png"
+      }
     ]
   },
   "sitemapLocation": "sitemap.json",

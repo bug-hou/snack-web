@@ -1,0 +1,54 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="detail-message">正在加载帖子…</view>
+  <view wx:elif="{{error}}" class="detail-message">{{error}}</view>
+
+  <block wx:elif="{{post}}">
+    <view class="post-main">
+      <view class="post-board">{{post.boardName}}</view>
+      <view class="post-title">{{post.title}}</view>
+      <view class="author-row">
+        <text class="post-avatar">{{post.initial}}</text>
+        <view class="author-copy">
+          <view class="author-name">{{post.author}}<text wx:if="{{post.isMine}}" class="mine-tag">我发布的</text></view>
+          <view class="author-time">{{post.timeText}}</view>
+        </view>
+      </view>
+      <view class="post-content">{{post.content}}</view>
+      <view wx:if="{{post.images.length}}" class="post-images">
+        <image wx:for="{{post.images}}" wx:key="*this" class="post-image" src="{{item}}" mode="widthFix" data-src="{{item}}" bindtap="previewImage" lazy-load="{{true}}"/>
+      </view>
+    </view>
+
+    <view class="action-row">
+      <view class="like-btn {{post.liked ? 'liked' : ''}}" bindtap="toggleLike">{{post.liked ? '已赞' : '点赞'}} {{post.likeCount}}</view>
+      <button class="share-btn" open-type="share">分享给邻居</button>
+      <view wx:if="{{post.isMine}}" class="delete-btn" bindtap="removePost">删除</view>
+    </view>
+
+    <view class="comment-head">全部评论 <text wx:if="{{post.commentCount}}">{{post.commentCount}}</text></view>
+
+    <view wx:if="{{!comments.length}}" class="comment-empty">
+      <view class="empty-title">还没有邻居留言</view>
+      <view class="empty-copy">友善的一句话，往往能帮上大忙。</view>
+    </view>
+
+    <view wx:for="{{comments}}" wx:key="id" class="comment-card">
+      <view class="comment-top">
+        <text class="comment-avatar">{{item.initial}}</text>
+        <view class="comment-copy">
+          <view class="comment-author">{{item.author}}</view>
+          <view class="comment-time">{{item.timeText}}</view>
+        </view>
+        <text wx:if="{{item.isMine}}" class="comment-del" data-id="{{item.id}}" catchtap="removeComment">删除</text>
+      </view>
+      <view class="comment-body">{{item.content}}</view>
+    </view>
+
+    <view class="detail-foot">帖子内容由邻居自行发布，仅代表个人观点。线下见面请选在小区公共区域，注意人身与财物安全。</view>
+  </block>
+
+  <view class="comment-bar">
+    <input class="comment-input" value="{{draft}}" maxlength="200" placeholder="友善发言，共建邻里氛围" placeholder-class="comment-placeholder" bindinput="onDraft" confirm-type="send" bindconfirm="submitComment"/>
+    <view class="comment-send {{sending ? 'disabled' : ''}}" bindtap="submitComment">{{sending ? '发送中' : '发送'}}</view>
+  </view>
+</view>

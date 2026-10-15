@@ -1,0 +1,51 @@
+<view class="form-page">
+  <view class="form-head">
+    <view class="form-title">发布帖子</view>
+    <view class="form-sub">写下想说的话，邻居们在广场就能看到</view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-label">选择板块</view>
+    <view class="board-grid">
+      <view wx:for="{{boards}}" wx:key="id" class="board-option {{board === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="pickBoard">{{item.name}}</view>
+    </view>
+    <view wx:if="{{board === 'notice'}}" class="field-hint">社区公告由社区管理员发布，普通邻居发布的公告会被移入闲聊板块。</view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-label">标题</view>
+    <input class="title-input" value="{{title}}" maxlength="40" placeholder="一句话说清是什么事" bindinput="onTitle"/>
+    <view class="counter">{{title.length}}/40</view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-label">正文</view>
+    <textarea class="content-input" value="{{content}}" maxlength="1000" placeholder="尽量写清时间、地点和需要的帮助" bindinput="onContent" auto-height="{{false}}"/>
+    <view class="counter">{{content.length}}/1000</view>
+  </view>
+
+  <view class="form-card">
+    <view class="form-label">配图 <text class="label-note">选填，最多 3 张</text></view>
+    <view class="image-row">
+      <view wx:for="{{images}}" wx:key="*this" class="image-box">
+        <image class="image-preview" src="{{item}}" mode="aspectFill"/>
+        <view class="image-remove" data-index="{{index}}" catchtap="removeImage">×</view>
+      </view>
+      <view wx:if="{{images.length < 3}}" class="image-add" bindtap="chooseImage">＋</view>
+    </view>
+  </view>
+
+  <view class="rules-card">
+    <view class="rules-title">发布须知</view>
+    <view class="rule-line">· 只发邻里信息交流，不发商品交易、广告、二维码、手机号或微信群。</view>
+    <view class="rule-line">· 不使用真实姓名与门牌号，广场只显示匿名昵称。</view>
+    <view class="rule-line">· 涉及线下见面请在小区公共区域，并自行注意安全。</view>
+  </view>
+
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+
+  <view class="form-footer">
+    <view class="submit-button {{submitting || uploading ? 'disabled' : ''}}" bindtap="submit">{{submitting ? '正在发布…' : '发布到广场'}}</view>
+    <view class="cancel-button" bindtap="goBack">取消</view>
+  </view>
+</view>

@@ -33,7 +33,7 @@
         <view wx:if="{{stations.length}}" class="chip-wrap">
           <view wx:for="{{stations}}" wx:key="*this" class="chip {{station === item ? 'chosen' : ''}}" data-value="{{item}}" bindtap="pickStation">{{item}}</view>
         </view>
-        <view wx:else class="empty-line">商家还没有配置快递站点，暂时无法下单</view>
+        <view wx:else class="empty-line">商家还没有配置快递站点，暂时无法登记</view>
       </view>
 
       <view class="card">
@@ -131,6 +131,6 @@
     </view>
 
     <button class="submit-button" disabled="{{submitting || !config || !config.enabled}}" bindtap="submit">{{submitting ? '提交中…' : '提交服务订单'}}</button>
-    <view class="foot-note">货到付款 · 服务时间以店铺配置为准</view>
+    <view class="foot-note">线下当面结算 · 服务时间以店铺配置为准</view>
   </block>
 </view>

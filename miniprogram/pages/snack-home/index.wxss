@@ -8,6 +8,7 @@ page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microso
 .header-orders { min-width: 96rpx; display: flex; flex-direction: column; align-items: center; font-size: 18rpx; color: #4C5B50; }
 .header-orders image { width: 34rpx; height: 34rpx; margin-bottom: 6rpx; }
 .shop-content { padding: 4rpx 32rpx 40rpx; }
+.compliance-banner { margin-bottom: 18rpx; padding: 16rpx 20rpx; border-radius: 18rpx; background: #F1EFE5; color: #6C766B; font-size: 19rpx; line-height: 1.6; }
 .address-entry { display: flex; align-items: center; padding: 18rpx 20rpx; border: 1rpx solid #E4EAE0; border-radius: 22rpx; background: #fff; }
 .address-pin { width: 34rpx; height: 34rpx; margin-right: 14rpx; flex-shrink: 0; }
 .address-copy { flex: 1; min-width: 0; overflow: hidden; }
@@ -67,6 +68,12 @@ page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microso
 .sharing-desc { font-size: 19rpx; color: #69746B; margin-top: 8rpx; line-height: 1.5; }
 .publish-button { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 16rpx; min-height: 88rpx; border-radius: 22rpx; background: #EDF3E9; color: #34765B; font-size: 25rpx; font-weight: 700; }
 .publish-button image { width: 28rpx; height: 28rpx; margin-right: 10rpx; }
+.forum-entry { display: flex; align-items: center; background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 24rpx 26rpx; }
+.forum-entry-pressed { background: #F4F6F1; }
+.forum-entry-copy { flex: 1; min-width: 0; }
+.forum-entry-title { font-size: 26rpx; font-weight: 800; }
+.forum-entry-desc { font-size: 20rpx; color: #6B756C; margin-top: 8rpx; }
+.forum-entry-arrow { font-size: 36rpx; color: #9AA49A; margin-left: 14rpx; }
 .shop-state { font-size: 20rpx; color: #34765B; padding: 7rpx 14rpx; background: #E6EEE1; border-radius: 30rpx; }
 .catalog-caption { font-size: 19rpx; color: #69746B; margin: -4rpx 0 20rpx; }
 .featured-scroll { white-space: nowrap; margin-bottom: 24rpx; }
@@ -95,14 +102,16 @@ page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microso
 .tone-peach { background: #F7DFC6; }.tone-cocoa { background: #E9D3BE; }.tone-butter { background: #F5EDC6; }.tone-sage { background: #DDE9D8; }.tone-rose { background: #F3DFD5; }.tone-mango { background: #F8DFB5; }.tone-lemon { background: #EBEAC8; }.tone-oat { background: #E6E0D3; }
 .product-name { margin: 16rpx 4rpx 5rpx; font-size: 25rpx; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .product-spec { margin: 0 4rpx; font-size: 20rpx; color: #6C766B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.product-bottom { display: flex; align-items: center; justify-content: space-between; margin: 10rpx 4rpx 0; }
+.product-price-row { display: flex; align-items: baseline; margin: 12rpx 4rpx 0; }
 .product-price { font-size: 29rpx; font-weight: 800; color: #AF441F; }
 .product-price text { font-size: 21rpx; }
-.qty-controls { display: flex; align-items: center; }
+.price-note { font-size: 17rpx; color: #949E94; margin-left: 8rpx; }
+.qty-controls { display: flex; align-items: center; justify-content: flex-end; margin: 10rpx 4rpx 0; }
 .qty-plus, .qty-minus { width: 56rpx; height: 66rpx; border-radius: 18rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; background: #34765B; color: #fff; margin-left: 6rpx; }
 .qty-minus { background: #EDF1E8; color: #34765B; }
 .qty-value { font-size: 22rpx; min-width: 20rpx; text-align: center; }
-.buy-now { min-height: 72rpx; display: flex; align-items: center; justify-content: center; margin: 12rpx 4rpx 0; background: #EDF3E9; color: #34765B; font-size: 23rpx; font-weight: 700; border-radius: 16rpx; }
+.want-hint { min-height: 62rpx; display: flex; align-items: center; justify-content: center; margin: 12rpx 4rpx 0; background: #F5F7F1; color: #6C766B; font-size: 19rpx; border-radius: 16rpx; }
+.want-hint.in-list { background: #EDF3E9; color: #34765B; font-weight: 700; }
 .empty-results { padding: 56rpx 20rpx; color: #69746B; text-align: center; font-size: 24rpx; line-height: 1.6; }
 .bottom-note { text-align: center; color: #919B92; font-size: 19rpx; margin-top: 40rpx; }
 .floating-cart { position: fixed; left: 32rpx; right: 32rpx; bottom: calc(22rpx + env(safe-area-inset-bottom)); min-height: 100rpx; padding: 12rpx 16rpx 12rpx 26rpx; box-sizing: border-box; border-radius: 24rpx; display: flex; align-items: center; justify-content: space-between; background: #26352E; color: #fff; box-shadow: 0 10rpx 28rpx rgba(38,53,46,.16); }

@@ -31,5 +31,6 @@ Page({
       }
     });
   },
-  goOrders() { wx.switchTab({ url: '/pages/snack-orders/index' }); }
+  goOrders() { wx.navigateTo({ url: '/pages/snack-orders/index' }); },
+  goForum() { wx.switchTab({ url: '/pages/community-forum/index' }); }
 });

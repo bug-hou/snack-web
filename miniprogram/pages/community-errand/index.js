@@ -79,7 +79,7 @@ Page({
   },
   renderAddress(current) {
     if (!current) {
-      this.setData({ addressText: '还没有收货地址', addressPerson: '添加一个地址，下单就不用重复填', addressTail: '' });
+      this.setData({ addressText: '还没有收货地址', addressPerson: '添加一个地址，登记时就不用重复填', addressTail: '' });
       return;
     }
     const tail = current.pickupPhoneLast4 || String(current.phone || '').slice(-4);
@@ -225,11 +225,11 @@ Page({
       payload.budgetCents = budgetCents;
     }
     const summary = type === 'express'
-      ? `站点：${station}\n包裹：${payload.packages.length} 个\n收货：${this.data.addressText}\n跑腿费：¥${money(payload.expectedTotalCents)}（货到付款）`
+      ? `站点：${station}\n包裹：${payload.packages.length} 个\n收货：${this.data.addressText}\n跑腿费：¥${money(payload.expectedTotalCents)}（线下当面结算）`
       : `门店：${config.store || '京东便利店'}\n商品：${payload.items.length} 项\n收货：${this.data.addressText}\n跑腿费：¥${money(payload.expectedTotalCents)}，商品按实际报价`;
     const confirmed = await new Promise(resolve => wx.showModal({
       title: type === 'express' ? '确认代取信息' : '确认代买清单', content: summary,
-      confirmText: '确认下单', cancelText: '再看看',
+      confirmText: '确认登记', cancelText: '再看看',
       success: res => resolve(res.confirm), fail: () => resolve(false)
     }));
     if (!confirmed) return;
@@ -238,8 +238,8 @@ Page({
       wx.showLoading({ title: '正在提交', mask: true });
       await callShop('createServiceOrder', payload);
       wx.hideLoading();
-      wx.showToast({ title: type === 'express' ? '代取订单已提交' : '代买订单已提交', icon: 'success' });
-      wx.switchTab({ url: '/pages/snack-orders/index' });
+      wx.showToast({ title: type === 'express' ? '代取需求已登记' : '代买需求已登记', icon: 'success' });
+      wx.redirectTo({ url: '/pages/snack-orders/index' });
     } catch (error) {
       wx.hideLoading();
       wx.showToast({ title: error.message || '提交失败，请重试', icon: 'none' });

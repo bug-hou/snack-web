@@ -122,17 +122,13 @@ Page({
   goShares() { wx.navigateTo({ url: '/pages/community-share/index' }); },
   goPublish() { wx.navigateTo({ url: '/pages/community-share-form/index' }); },
   openShare(e) { wx.navigateTo({ url: `/pages/community-share-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}` }); },
-  goOrders() { wx.switchTab({ url: '/pages/snack-orders/index' }); },
+  goOrders() { wx.navigateTo({ url: '/pages/snack-orders/index' }); },
   onSearch(e) { this.setData({ keyword: e.detail.value }, () => this.refresh()); },
   clearSearch() { this.setData({ keyword: '' }, () => this.refresh()); },
   selectCategory(e) { this.setData({ activeCategory: e.currentTarget.dataset.id }, () => this.refresh()); },
   add(e) { cart.change(e.currentTarget.dataset.id, 1); this.refresh(); },
   reduce(e) { cart.change(e.currentTarget.dataset.id, -1); this.refresh(); },
-  buyNow(e) {
-    const id = e.currentTarget.dataset.id;
-    if (!products.some(product => product.id === id)) return;
-    wx.navigateTo({ url: `/pages/snack-checkout/index?productId=${encodeURIComponent(id)}` });
-  },
   retryCatalog() { this.loadCatalog(); },
-  openCart() { wx.switchTab({ url: '/pages/snack-cart/index' }); }
+  goForum() { wx.switchTab({ url: '/pages/community-forum/index' }); },
+  openCart() { wx.navigateTo({ url: '/pages/snack-cart/index' }); }
 });

@@ -1,0 +1,48 @@
+<view class="forum-page">
+  <view class="forum-head">
+    <view class="forum-brand">
+      <view class="brand-mark">坊</view>
+      <view class="brand-copy">
+        <view class="brand-name">邻里广场</view>
+        <view class="brand-kicker">聊两句，问一声，搭把手</view>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view scroll-x="{{true}}" class="board-scroll" show-scrollbar="{{false}}">
+    <view wx:for="{{boards}}" wx:key="id" class="board-chip {{board === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectBoard">{{item.name}}</view>
+  </scroll-view>
+
+  <view class="forum-notice">广场只做邻里信息交流：请勿发布交易、广告、二维码或个人联系方式。违规内容会被下架。</view>
+
+  <view wx:if="{{loading}}" class="forum-message">正在加载帖子…</view>
+  <view wx:elif="{{error}}" class="forum-message retry" bindtap="retry">{{error}} · 点击重试</view>
+  <view wx:elif="{{!posts.length}}" class="forum-empty">
+    <view class="empty-art"><image src="/images/community/repeat-2.svg"/></view>
+    <view class="empty-title">这个板块还很安静</view>
+    <view class="empty-copy">发一条帖子，让邻居先认识你。</view>
+    <view class="primary-action" bindtap="goPublish">发布第一条　→</view>
+  </view>
+
+  <block wx:else>
+    <view wx:for="{{posts}}" wx:key="id" class="post-card" data-id="{{item.id}}" bindtap="openPost" hover-class="post-pressed">
+      <view class="post-top">
+        <text class="post-board">{{item.boardName}}</text>
+        <text wx:if="{{item.pinned}}" class="post-pin">置顶</text>
+      </view>
+      <view class="post-title">{{item.title}}</view>
+      <view wx:if="{{item.excerpt}}" class="post-excerpt">{{item.excerpt}}</view>
+      <view wx:if="{{item.images.length}}" class="post-thumbs">
+        <image wx:for="{{item.images}}" wx:for-item="src" wx:key="*this" class="post-thumb" src="{{src}}" mode="aspectFill" lazy-load="{{true}}"/>
+      </view>
+      <view class="post-foot">
+        <view class="post-author"><text class="post-avatar">{{item.initial}}</text><text>{{item.author}}</text></view>
+        <view class="post-meta"><text>{{item.timeText}}</text><view class="meta-dot">·</view><text>赞 {{item.likeCount}}</text><view class="meta-dot">·</view><text>评论 {{item.commentCount}}</text></view>
+      </view>
+    </view>
+    <view wx:if="{{loadingMore}}" class="forum-message">正在加载更多…</view>
+    <view wx:elif="{{!hasMore}}" class="forum-message">没有更多帖子了</view>
+  </block>
+
+  <view class="publish-button" bindtap="goPublish"><image src="/images/community/plus.svg"/><text>发布帖子</text></view>
+</view>

@@ -24,7 +24,7 @@
         <text class="action danger" data-id="{{item.id}}" bindtap="remove">删除</text>
       </view>
     </view>
-    <view wx:if="{{!list.length}}" class="empty">还没有收货地址，添加一次后下单就不用重复填写啦。</view>
+    <view wx:if="{{!list.length}}" class="empty">还没有收货地址，添加一次后登记就不用重复填写啦。</view>
     <view class="add-button" bindtap="add">＋ 新增收货地址</view>
   </block>
 

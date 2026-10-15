@@ -8,7 +8,7 @@ Page({
   async onShow() {
     const cached = peekContext();
     if (cached) this.applyConfig(cached);
-    // 本地没有商品缓存时展示加载态，避免先闪出“购物车还空空的”
+    // 本地没有商品缓存时展示加载态，避免先闪出“清单还空空的”
     this.setData({ loading: !products.length, settingsReady: !!cached });
     this.refresh();
     try {
@@ -35,7 +35,7 @@ Page({
   reduce(e) { cart.change(e.currentTarget.dataset.id, -1); this.refresh(); },
   clearCart() {
     wx.showModal({
-      title: '清空购物车', content: '确定移除所有商品吗？',
+      title: '清空需求清单', content: '确定移除清单里的全部商品吗？',
       success: result => { if (result.confirm) { cart.clear(); this.refresh(); } }
     });
   },

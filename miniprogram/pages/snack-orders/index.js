@@ -5,7 +5,7 @@ const NEXT_STATUS = { pending: 'processing', processing: 'packed', packed: 'deli
 const NEXT_TEXT = { pending: '开始处理', processing: '配货完成', packed: '开始配送', delivering: '确认送达', confirmed: '配货完成' };
 const CONTACT_LABELS = { knock: '请敲门', call: '到达后打电话', no_knock: '不要敲门' };
 const PROGRESS = { pending: 0, quoted: 0, processing: 1, confirmed: 1, packed: 2, delivering: 3, completed: 4, cancelled: -1 };
-const STEPS = ['已下单', '处理中', '已配货', '配送中', '已完成'];
+const STEPS = ['已登记', '处理中', '已备货', '送达中', '已完成'];
 const SERVICE_SIZE = { small: '小件', large: '大件' };
 const FINISHED = ['completed', 'cancelled'];
 const POLL_ACTIVE_MS = 8000;
@@ -124,7 +124,7 @@ Page({
       quoteText: service.quoteText, canConfirmQuote: service.canConfirmQuote, productLines: lines,
       id: order.id, status: order.status, statusText: order.statusText,
       dateText: formatTime(order.createdAt),
-      deliveryText: `${formatTime(order.createdAt)} 下单 · ${order.delivery || '尽快送达'}`,
+      deliveryText: `${formatTime(order.createdAt)} 登记 · ${order.delivery || '尽快送达'}`,
       recipient: order.recipient, phone: order.phone, address: order.address,
       contactText: CONTACT_LABELS[order.contactPreference] || '请敲门',
       note: order.note || '',
@@ -151,7 +151,7 @@ Page({
   cancel(e) {
     const order = this.data.orders.find(item => item.id === e.currentTarget.dataset.id);
     if (!order) return;
-    wx.showModal({ title: '确认取消订单', content: '取消后无法恢复，需要重新下单。',
+    wx.showModal({ title: '确认取消登记', content: '取消后无法恢复，需要重新登记。',
       confirmText: '取消订单', confirmColor: '#AF441F', cancelText: '再想想',
       success: result => { if (result.confirm) this.updateStatus(order.id, 'cancelled'); } });
   },
