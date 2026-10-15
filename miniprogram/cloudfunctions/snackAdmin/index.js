@@ -21,10 +21,11 @@ const SHARE_STATUS = { pending: '待审核', approved: '已公开', rejected: '�
 const SHARE_MAX_STATIONS = 10;
 const CATEGORIES = ['fresh', 'household', 'dairy'];
 const PRODUCT_IMAGES = ['/images/products/eggs.jpg', '/images/products/tissue.jpg', '/images/products/milk.jpg'];
-const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-f0-9]{32}\.(jpg|png|webp)$/;
+// 商品图统一存放在云开发存储（COS）的 products/ 目录，旧数据在库里仍是本地路径，保留白名单兼容
+const UPLOADED_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/products\/[a-zA-Z0-9._-]{1,80}\.(jpg|png|webp)$/;
 const TONES = ['peach', 'cocoa', 'butter', 'sage', 'rose', 'mango', 'lemon', 'oat'];
 const DEFAULTS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '',
-  expressEnabled: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
+  expressEnabled: false, expressFollowShop: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressLargeFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
   purchaseEnabled: false, purchaseFeeCents: 500, purchaseStart: '09:00', purchaseEnd: '21:00', purchaseStore: '京东便利店',
   secondhandEnabled: false };
 
@@ -42,9 +43,15 @@ function clock(value, label) {
 }
 function stations(value) {
   const raw = Array.isArray(value) ? value : String(value || '').split(/[\n,，]/);
-  const list = raw.map(item => String(item || '').trim()).filter(Boolean).slice(0, SHARE_MAX_STATIONS);
-  for (const item of list) {
-    if (item.length > 20 || /[\u0000-\u001f\u007f]/.test(item)) throw new Error('快递站点名称过长或格式不正确');
+  const seen = new Set();
+  const list = [];
+  for (const item of raw) {
+    const name = String(item || '').trim();
+    if (!name || seen.has(name)) continue;
+    if (name.length > 20 || /[\u0000-\u001f\u007f]/.test(name)) throw new Error('快递站点名称过长或格式不正确');
+    seen.add(name);
+    list.push(name);
+    if (list.length >= SHARE_MAX_STATIONS) break;
   }
   return list;
 }
@@ -73,8 +80,10 @@ function checkedSettings(input) {
     deliveryFeeCents: cents(input.deliveryFeeCents, '配送费', 10000),
     minOrderCents: cents(input.minOrderCents, '起送价', 1000000), ownerOpenid, ownerWechat,
     expressEnabled: input.expressEnabled === true,
+    expressFollowShop: input.expressFollowShop === true,
     expressBaseFeeCents: cents(input.expressBaseFeeCents, '代取基础跑腿费', 10000),
     expressExtraFeeCents: cents(input.expressExtraFeeCents, '每多一件加价', 10000),
+    expressLargeFeeCents: cents(input.expressLargeFeeCents, '大件加价', 10000),
     expressStart, expressEnd, expressStations: stations(input.expressStations),
     purchaseEnabled: input.purchaseEnabled === true,
     purchaseFeeCents: cents(input.purchaseFeeCents, '代买跑腿费', 10000),
@@ -186,11 +195,13 @@ async function quoteOrder(input) {
   if (!result.stats || result.stats.updated !== 1) throw new Error('订单状态已变化，请刷新重试');
   return { id, status: 'quoted' };
 }
+// 闲置发布即公开，管理端只做下架/恢复（保留 rejected 兼容历史数据）
 async function reviewShare(input) {
   const id = text(input.id, 40, '物品编号');
-  const status = text(input.status, 20, '审核结果');
-  if (!/^[a-f0-9]{32}$/.test(id) || !['approved', 'rejected'].includes(status)) throw new Error('审核参数不正确');
-  const reason = status === 'rejected' ? text(input.reason, 60, '未通过原因') : '';
+  const status = text(input.status, 20, '物品状态');
+  if (!/^[a-f0-9]{32}$/.test(id) || !['approved', 'off', 'rejected'].includes(status)) throw new Error('操作参数不正确');
+  const reason = status === 'rejected' ? text(input.reason, 60, '未通过原因')
+    : (typeof input.reason === 'string' ? input.reason.trim().slice(0, 60) : '');
   const { data: existing } = await shares.doc(id).get().catch(() => ({ data: null }));
   if (!existing) throw new Error('物品不存在');
   if (!['pending', 'approved', 'rejected', 'off', 'taken'].includes(existing.status)) throw new Error('物品状态不正确');

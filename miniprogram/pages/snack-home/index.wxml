@@ -1,15 +1,15 @@
 <view class="community-page">
   <view class="community-header">
     <view class="community-brand"><view class="brand-mark">里</view><view><view class="brand-name">爱尚里生活</view><view class="brand-kicker">家门口的小事，一起办好</view></view></view>
-    <button class="header-orders" bindtap="goOrders" aria-label="查看我的订单"><image src="/images/community/clipboard-list.svg"/><text>我的订单</text></button>
+    <view aria-role="button" class="header-orders" bindtap="goOrders" aria-label="查看我的订单"><image src="/images/community/clipboard-list.svg"/><text>我的订单</text></view>
   </view>
 
   <view class="shop-content">
-    <button class="address-entry" bindtap="goAddress" aria-label="管理收货地址">
+    <view aria-role="button" class="address-entry" bindtap="goAddress" aria-label="管理收货地址">
       <image class="address-pin" src="/images/community/map-pin.svg"/>
       <view class="address-copy"><view class="address-current">{{addressText}}</view><view class="address-sub">{{addressHint}}</view></view>
       <text class="address-arrow">›</text>
-    </button>
+    </view>
 
     <view class="community-intro">
       <view class="intro-copy">
@@ -22,20 +22,23 @@
 
     <view class="service-heading"><text>今天需要什么？</text><text class="service-heading-note">社区服务</text></view>
     <view class="service-list">
-      <button wx:for="{{services}}" wx:key="id" class="service-card service-{{item.id}}" data-id="{{item.id}}" bindtap="openService" hover-class="service-pressed" aria-label="{{item.title}}">
+      <view aria-role="button" wx:for="{{services}}" wx:key="id" class="service-card service-{{item.id}}" data-id="{{item.id}}" bindtap="openService" hover-class="service-pressed" aria-label="{{item.title}}">
         <view class="service-icon"><image src="/images/community/{{item.icon}}.svg" mode="aspectFit"/></view>
         <view class="service-copy">
-          <view class="service-title">{{item.shortTitle}}</view>
+          <view class="service-title-row">
+            <text class="service-title">{{item.shortTitle}}</text>
+            <text wx:if="{{item.text}}" class="service-state {{item.tone}}">{{item.text}}</text>
+          </view>
           <view wx:if="{{item.id === 'purchase'}}" class="service-subtitle">京东便利店 · 非官方代买</view>
           <view wx:else class="service-subtitle">{{item.subtitle}}</view>
         </view>
         <text class="service-arrow">›</text>
-      </button>
+      </view>
     </view>
 
     <view class="section-head">
       <view><view class="section-eyebrow">PASS IT ON</view><view class="section-name">邻里闲置</view></view>
-      <button class="section-link" bindtap="goShares">全部 ›</button>
+      <view aria-role="button" class="section-link" bindtap="goShares">全部 ›</view>
     </view>
     <block wx:if="{{shares.length}}">
       <view class="share-row">
@@ -50,7 +53,7 @@
       <view class="sharing-symbol"><image src="/images/community/repeat-2.svg"/></view>
       <view class="sharing-copy"><view class="sharing-title">让好物，在小区里接力</view><view class="sharing-desc">{{shareHint}}</view></view>
     </view>
-    <button class="publish-button" bindtap="goPublish"><image src="/images/community/plus.svg"/><text>发布闲置</text></button>
+    <view aria-role="button" class="publish-button" bindtap="goPublish"><image src="/images/community/plus.svg"/><text>发布闲置</text></view>
 
     <view id="community-catalog" class="section-head catalog-head">
       <view><view class="section-eyebrow">DAILY ESSENTIALS</view><view class="section-name">便利铺现货</view></view>
@@ -61,7 +64,7 @@
       <view wx:for="{{featured}}" wx:key="id" class="featured-item">
         <view class="featured-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="featured-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="mini-pack"><text>{{item.initials}}</text></view></view>
         <view class="featured-label">{{item.name}}</view>
-        <view class="featured-price">¥{{item.price}} <button data-id="{{item.id}}" bindtap="add" aria-label="加入购物车">＋</button></view>
+        <view class="featured-price">¥{{item.price}} <view aria-role="button" class="featured-add" data-id="{{item.id}}" bindtap="add" aria-label="加入购物车">＋</view></view>
       </view>
     </scroll-view>
     <view class="search-box"><view class="search-icon"></view><input class="search-input" value="{{keyword}}" placeholder="搜索鸡蛋、牛奶、日用品" placeholder-class="search-placeholder" bindinput="onSearch" confirm-type="search"/><text wx:if="{{keyword}}" class="clear-search" bindtap="clearSearch">清除</text></view>

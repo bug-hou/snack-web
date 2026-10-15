@@ -41,6 +41,6 @@
   </view>
 
   <view wx:if="{{error}}" class="error-line">{{error}}</view>
-  <button class="submit-button" disabled="{{submitting || uploading}}" bindtap="submit">{{submitting ? '发布中…' : '提交审核'}}</button>
-  <view class="foot-note">发布后需店主审核才会公开；请不要发布他人物品或违规内容。</view>
+  <button class="submit-button" disabled="{{submitting || uploading}}" bindtap="submit">{{submitting ? '发布中…' : '发布闲置'}}</button>
+  <view class="foot-note">发布后立即对邻居公开；请不要发布他人物品或违规内容。</view>
 </view>

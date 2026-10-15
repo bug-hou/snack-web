@@ -8,7 +8,7 @@ const shopSettings = db.collection('snack_shop_settings_v1');
 const addresses = db.collection('snack_addresses_v1');
 const shares = db.collection('snack_shares_v1');
 const DEFAULT_SETTINGS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '',
-  expressEnabled: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
+  expressEnabled: false, expressFollowShop: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressLargeFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
   purchaseEnabled: false, purchaseFeeCents: 500, purchaseStart: '09:00', purchaseEnd: '21:00', purchaseStore: '京东便利店',
   secondhandEnabled: false };
 const STATUS = { pending: '待处理', quoted: '待确认报价', processing: '订单处理中', packed: '配货完成', delivering: '配送中', completed: '配送完成', cancelled: '已取消', confirmed: '订单处理中' };
@@ -16,7 +16,7 @@ const NEXT = { pending: ['quoted', 'processing', 'cancelled'], quoted: ['process
 const BUILDINGS = ['16', '17', '18'];
 const CONTACT_PREFERENCES = ['knock', 'call', 'no_knock'];
 const ADDRESS_LIMIT = 10;
-const EXPRESS_MAX_PACKAGES = 5;
+const EXPRESS_MAX_PACKAGES = 20;
 const PURCHASE_MAX_ITEMS = 10;
 const PACKAGE_SIZES = ['small', 'large'];
 const SHARE_CONDITIONS = { new: '几乎全新', like: '九成新', used: '七成新', worn: '有使用痕迹' };
@@ -98,9 +98,22 @@ function enabled(settings) {
 function stationList(settings) {
   return Array.isArray(settings.expressStations) ? settings.expressStations.filter(s => typeof s === 'string' && s.trim()).slice(0, 10) : [];
 }
+// 代取费用 = 基础跑腿费（含首件）+ 每多一件加价 + 每个大件加价
+function expressFeeCents(settings, packages) {
+  const largeCount = packages.filter(pkg => pkg.size === 'large').length;
+  return settings.expressBaseFeeCents
+    + settings.expressExtraFeeCents * Math.max(packages.length - 1, 0)
+    + settings.expressLargeFeeCents * largeCount;
+}
+// 代取可以跟随店铺营业时间，避免和店铺营业状态不一致
+function serviceWindow(settings, kind) {
+  if (kind === 'express' && settings.expressFollowShop === true) {
+    return { start: settings.businessStart, end: settings.businessEnd };
+  }
+  return { start: settings[`${kind}Start`], end: settings[`${kind}End`] };
+}
 function serviceOpen(settings, kind) {
-  const start = kind === 'express' ? settings.expressStart : settings.purchaseStart;
-  const end = kind === 'express' ? settings.expressEnd : settings.purchaseEnd;
+  const { start, end } = serviceWindow(settings, kind);
   const current = clockNow();
   return settings[`${kind}Enabled`] === true && current >= start && current < end;
 }
@@ -112,7 +125,9 @@ function publicSettings(settings) {
     ownerWechat: typeof settings.ownerWechat === 'string' ? settings.ownerWechat : '',
     express: { enabled: serviceOpen(settings, 'express'), configured: settings.expressEnabled === true,
       baseFeeCents: settings.expressBaseFeeCents, extraFeeCents: settings.expressExtraFeeCents,
-      start: settings.expressStart, end: settings.expressEnd, stations: stationList(settings) },
+      largeFeeCents: settings.expressLargeFeeCents, followShop: settings.expressFollowShop === true,
+      start: serviceWindow(settings, 'express').start, end: serviceWindow(settings, 'express').end,
+      stations: stationList(settings) },
     purchase: { enabled: serviceOpen(settings, 'purchase'), configured: settings.purchaseEnabled === true,
       feeCents: settings.purchaseFeeCents, start: settings.purchaseStart, end: settings.purchaseEnd,
       store: typeof settings.purchaseStore === 'string' && settings.purchaseStore ? settings.purchaseStore : '京东便利店' },
@@ -279,7 +294,8 @@ async function createServiceOrder(openid, input) {
     }
     const station = requireText(input.station, 20, '快递站点');
     const configured = stationList(settings);
-    if (configured.length && !configured.includes(station)) throw new Error('请选择支持的快递站点');
+    if (!configured.length) throw new Error('商家还没有配置快递站点，暂无法下单');
+    if (!configured.includes(station)) throw new Error('请选择支持的快递站点');
     const packages = input.packages.map((item, index) => {
       const code = requireText(item && item.code, 32, `第${index + 1}个包裹的取件码`);
       if (!/^[0-9A-Za-z-]{4,32}$/.test(code)) throw new Error('取件码仅支持数字、字母和短横线');
@@ -287,7 +303,7 @@ async function createServiceOrder(openid, input) {
       const size = PACKAGE_SIZES.includes(item && item.size) ? item.size : 'small';
       return { code, phoneLast4, size };
     });
-    const serviceFeeCents = settings.expressBaseFeeCents + settings.expressExtraFeeCents * (packages.length - 1);
+    const serviceFeeCents = expressFeeCents(settings, packages);
     if (!Number.isSafeInteger(input.expectedTotalCents) || input.expectedTotalCents !== serviceFeeCents) {
       throw new Error('代取费用已变化，请返回重新确认');
     }
@@ -436,8 +452,9 @@ async function createShare(openid, input) {
   if (total >= SHARE_LIMIT) throw new Error(`最多发布${SHARE_LIMIT}件物品，请先下架不再分享的物品`);
   const id = crypto.randomBytes(16).toString('hex');
   const now = Date.now();
+  // 发布即公开，不再需要店主审核；违规内容由管理端下架
   const doc = { _id: id, ownerOpenid: openid, title, description, condition, mode, priceCents,
-    images, meetup, status: 'pending', createdAt: now, updatedAt: now };
+    images, meetup, status: 'approved', createdAt: now, updatedAt: now };
   await shares.add({ data: doc });
   return viewShare(doc, true);
 }
@@ -445,7 +462,7 @@ async function updateShare(openid, input) {
   const id = requireText(input.id, 40, '物品编号');
   if (!/^[a-f0-9]{32}$/.test(id)) throw new Error('物品编号格式不正确');
   const status = requireText(input.status, 10, '物品状态');
-  if (!['pending', 'off', 'taken'].includes(status)) throw new Error('不支持的物品状态');
+  if (!['approved', 'off', 'taken'].includes(status)) throw new Error('不支持的物品状态');
   const { data: existing } = await shares.doc(id).get().catch(() => ({ data: null }));
   if (!existing || existing.ownerOpenid !== openid) throw new Error('物品不存在');
   const result = await shares.where({ _id: id, ownerOpenid: openid })

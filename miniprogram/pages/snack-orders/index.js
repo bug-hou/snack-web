@@ -152,14 +152,14 @@ Page({
     const order = this.data.orders.find(item => item.id === e.currentTarget.dataset.id);
     if (!order) return;
     wx.showModal({ title: '确认取消订单', content: '取消后无法恢复，需要重新下单。',
-      confirmText: '取消订单', confirmColor: '#E1251B', cancelText: '再想想',
+      confirmText: '取消订单', confirmColor: '#AF441F', cancelText: '再想想',
       success: result => { if (result.confirm) this.updateStatus(order.id, 'cancelled'); } });
   },
   remove(e) {
     const order = this.data.orders.find(item => item.id === e.currentTarget.dataset.id);
     if (!order || !order.canDelete) return;
     wx.showModal({ title: '删除订单', content: '删除后将不再显示这条订单记录，确定删除吗？',
-      confirmText: '删除', confirmColor: '#E1251B',
+      confirmText: '删除', confirmColor: '#AF441F',
       success: async result => {
         if (!result.confirm) return;
         try {

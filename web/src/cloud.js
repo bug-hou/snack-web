@@ -1,4 +1,5 @@
 import cloudbase from '@cloudbase/js-sdk';
+import ASSET_MAP from './assets-map.json';
 
 const env = import.meta.env.VITE_CLOUDBASE_ENV;
 if (!env) throw new Error('缺少环境变量 VITE_CLOUDBASE_ENV，请在 .env 或 Makers 环境变量中配置');
@@ -30,14 +31,15 @@ export async function uploadProductImage(file) {
 }
 
 const urlCache = new Map();
-// 将 cloud:// fileID 转为临时可访问链接；其他路径原样返回
+// 将 cloud:// fileID 转为临时可访问链接；仓库内的旧本地路径先映射为云端 fileID
 export async function resolveImage(src) {
   if (!src) return '';
-  if (!src.startsWith('cloud://')) return src.replace('/images/products/', '/products/');
-  if (urlCache.has(src)) return urlCache.get(src);
-  const result = await app.getTempFileURL({ fileList: [src] });
+  const mapped = ASSET_MAP[src] || src;
+  if (!mapped.startsWith('cloud://')) return mapped;
+  if (urlCache.has(mapped)) return urlCache.get(mapped);
+  const result = await app.getTempFileURL({ fileList: [mapped] });
   const item = result && result.fileList && result.fileList[0];
   const url = item && item.tempFileURL ? item.tempFileURL : '';
-  if (url) urlCache.set(src, url);
+  if (url) urlCache.set(mapped, url);
   return url;
 }

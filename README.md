@@ -166,3 +166,27 @@ node index.js
 1. **小程序域名白名单**：在微信公众平台配置云函数域名
 2. **后台管理**如需部署到线上，可将 admin 文件夹上传到云开发静态网站托管
 3. 云开发免费额度：调用次数 10 万次/月，足以支撑中小餐馆日常使用
+
+## 🖼️ 图片资源存储
+
+图片统一存放在**云开发存储（底层为 COS 对象存储）**，不再随小程序包发布：
+
+| 资源 | 云存储路径 | 说明 |
+| --- | --- | --- |
+| 商品图 | `products/<name>.jpg` | 后台上传或脚本迁移，数据库 `snack_products_v1.image` 存 `cloud://` fileID |
+| 闲置物品图 | `community/<id>.<ext>` | 居民发布时上传，数据库 `snack_shares_v1.images` 存 `cloud://` fileID |
+| UI 图标 | `icons/<name>.svg`（可选） | 默认保留在包内 `miniprogram/images/community/`，避免首屏网络依赖 |
+
+小程序 `<image src="cloud://...">` 可直接渲染；Web 管理端通过 `app.getTempFileURL()` 换取临时链接（`web/src/cloud.js` 的 `resolveImage`）。
+
+迁移仍在仓库里的本地图片：
+
+```bash
+cd web
+npm install                       # 安装 @cloudbase/node-sdk
+# 在 web/.env 追加：CLOUDBASE_SECRETID / CLOUDBASE_SECRETKEY（腾讯云 API 密钥）
+npm run assets:upload             # 上传 + 回填数据库 image 字段
+npm run assets:upload -- --clean  # 确认线上生效后再删除本地副本
+```
+
+可选参数：`--with-icons` 一并上传 UI 图标，`--no-db` 不写数据库，`--dry-run` 只打印计划。上传后的 fileID 映射写入 `web/src/assets-map.json`。

@@ -42,5 +42,5 @@ Page({
   },
   markTaken() { this.changeStatus('taken', '标记为已转出后，物品将从邻里闲置列表中移除。'); },
   markOff() { this.changeStatus('off', '下架后其他邻居将看不到这件物品。'); },
-  relist() { this.changeStatus('pending', '重新上架需要再次审核，确认提交吗？'); }
+  relist() { this.changeStatus('approved', '重新上架后立即对邻居公开，确认吗？'); }
 });

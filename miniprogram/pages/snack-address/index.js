@@ -2,6 +2,8 @@ const { callShop } = require('../../utils/snack-cloud');
 const { getAddresses, selectAddress } = require('../../utils/snack-address');
 
 const emptyForm = () => ({ id: '', label: '家', recipient: '', phone: '', building: '', room: '', contactPreference: 'knock', pickupPhoneLast4: '' });
+const CONTACT_TEXT = { knock: '送达请敲门', call: '送达先打电话', no_knock: '送达不要敲门' };
+const decorate = list => list.map(item => ({ ...item, contactText: CONTACT_TEXT[item.contactPreference] || '' }));
 Page({
   data: {
     list: [], selectedId: '', loading: true, saving: false, error: '', editing: false,
@@ -19,7 +21,7 @@ Page({
     this.setData({ loading: true, error: '' });
     try {
       const { list, selected } = await getAddresses();
-      this.setData({ list, selectedId: selected ? selected.id : '', loading: false });
+      this.setData({ list: decorate(list), selectedId: selected ? selected.id : '', loading: false });
     } catch (error) {
       this.setData({ loading: false, error: error.message || '地址加载失败，请重试' });
     }
@@ -33,7 +35,9 @@ Page({
   add() { this.setData({ editing: true, form: emptyForm(), error: '' }); },
   edit(e) {
     const address = this.data.list.find(item => item.id === e.currentTarget.dataset.id);
-    if (address) this.setData({ editing: true, form: { ...address }, error: '' });
+    if (!address) return;
+    const { contactText, ...rest } = address;
+    this.setData({ editing: true, form: { ...emptyForm(), ...rest }, error: '' });
   },
   closeForm() { this.setData({ editing: false, form: emptyForm(), error: '' }); },
   update(e) {

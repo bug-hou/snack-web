@@ -9,9 +9,23 @@ const shopStatusText = config => config.isOpen ? '接单中' : config.ordersEnab
 const SERVICE_PAGES = { express: 'community-errand', purchase: 'community-errand' };
 const SHARE_TONES = ['peach', 'sage', 'butter'];
 
+// 社区服务的营业状态：配置过但不在服务时间显示「休息中」，没配置过显示「未开放」
+function serviceStatus(config, id) {
+  if (id === 'secondhand') {
+    const enabled = !!(config && config.secondhand && config.secondhand.enabled);
+    return enabled ? { text: '已开放', tone: 'on' } : { text: '未开放', tone: 'off' };
+  }
+  const service = config && config[id];
+  if (!service || !service.configured) return { text: '未开放', tone: 'off' };
+  return service.enabled ? { text: '营业中', tone: 'on' } : { text: '休息中', tone: 'wait' };
+}
+function decorateServices(config) {
+  return services.map(item => ({ ...item, ...serviceStatus(config, item.id) }));
+}
+
 Page({
   data: {
-    services,
+    services: decorateServices(null),
     categories,
     activeCategory: 'all',
     keyword: '',
@@ -30,7 +44,7 @@ Page({
   onShow() {
     // 先用本地缓存立即渲染，再静默刷新
     const cachedContext = peekContext();
-    if (cachedContext) this.setData({ shopStatus: shopStatusText(cachedContext) });
+    if (cachedContext) this.setData({ shopStatus: shopStatusText(cachedContext), services: decorateServices(cachedContext) });
     this.applyAddress(peekAddresses());
     this.refresh();
     this.loadCatalog(); this.loadShopStatus(); this.loadAddress(); this.loadShares();
@@ -55,7 +69,7 @@ Page({
   async loadShopStatus() {
     try {
       const config = await loadContext();
-      this.setData({ shopStatus: shopStatusText(config) });
+      this.setData({ shopStatus: shopStatusText(config), services: decorateServices(config) });
     } catch (error) { /* 保留缓存中的状态 */ }
   },
   async loadShares() {

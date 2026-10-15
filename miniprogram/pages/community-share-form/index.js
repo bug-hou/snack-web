@@ -68,7 +68,7 @@ Page({
       await callShop('createShare', { title: title.trim(), description: description.trim(), meetup: meetup.trim(),
         condition: CONDITIONS[conditionIndex].value, mode, priceCents, images });
       wx.hideLoading();
-      wx.showToast({ title: '已提交，审核后公开', icon: 'success' });
+      wx.showToast({ title: '已发布，邻居可看到', icon: 'success' });
       wx.redirectTo({ url: '/pages/community-share/index' });
     } catch (error) {
       wx.hideLoading();

@@ -14,9 +14,9 @@
   ],
   "cloud": true,
   "window": {
-    "backgroundColor": "#F5F5F5",
+    "backgroundColor": "#F8F6F1",
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#F5F5F5",
+    "navigationBarBackgroundColor": "#F8F6F1",
     "navigationBarTitleText": "爱尚里 · 社区生活",
     "navigationBarTextStyle": "black"
   },

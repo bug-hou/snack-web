@@ -1,20 +1,19 @@
 @import "../../styles/snack.wxss";
-.profile-hero { border-radius: 27rpx; min-height: 180rpx; background: #1A1A1A; display: flex; gap: 28rpx; align-items: center; padding: 28rpx; color: white; }.profile-stamp { width: 110rpx; height: 110rpx; border-radius: 22rpx; background: #FF6A00; color: #4E4E4E; font-size: 18rpx; font-weight: 800; text-align: center; line-height: 1.4; display: flex; align-items: center; justify-content: center; transform: rotate(-7deg); }.profile-hero-title { font-size: 33rpx; font-weight: 800; }.profile-hero-sub { font-size: 20rpx; color: #D0D0D0; margin-top: 6rpx; }.profile-section { background: #fff; margin-top: 26rpx; border-radius: 24rpx; padding: 8rpx 26rpx; }.profile-section-heading { font-size: 28rpx; font-weight: 800; padding: 24rpx 0 6rpx; }.profile-row { min-height: 118rpx; border-bottom: 1rpx solid #EEEEEE; display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }.profile-row:last-child { border-bottom: 0; }.profile-row-title { font-size: 24rpx; font-weight: 700; }.profile-row-sub { font-size: 19rpx; color: #949494; margin-top: 5rpx; }.profile-row > text { color: #C81623; font-size: 20rpx; white-space: nowrap; }.compliance-note { margin-top: 25rpx; border-radius: 23rpx; background: #EEEEEE; padding: 25rpx; color: #727272; font-size: 22rpx; line-height: 1.7; }.compliance-title { font-size: 25rpx; font-weight: 800; color: #4E4E4E; margin-bottom: 9rpx; }.profile-link { text-align: center; border-radius: 22rpx; background: #1A1A1A; color: white; padding: 26rpx; margin-top: 28rpx; font-size: 24rpx; font-weight: 700; }.profile-footer { text-align: center; color: #ACACAC; font-size: 18rpx; letter-spacing: 2rpx; margin-top: 45rpx; }.profile-hero { background: #E1251B; }
-.profile-stamp { background: #FFEFED; color: #C81623; }
-.profile-stamp { font-size: 17rpx; word-break: break-word; }
-.profile-link { background: #E1251B; }
-.compliance-note { background: #FFEFED; color: #686868; }
-.profile-row > text { color: #E1251B; }
-.owner-id { padding: 16rpx 0 26rpx; color: #6F6F6F; font-size: 20rpx; word-break: break-all; }
+.profile-page { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
+.profile-hero { border-radius: 26rpx; min-height: 180rpx; background: #34765B; display: flex; gap: 28rpx; align-items: center; padding: 28rpx; color: #fff; }
+.profile-stamp { width: 110rpx; height: 110rpx; border-radius: 22rpx; background: #F6D781; color: #26352E; font-size: 29rpx; font-weight: 800; letter-spacing: 2rpx; text-align: center; display: flex; align-items: center; justify-content: center; transform: rotate(-7deg); }
+.profile-hero-title { font-size: 33rpx; font-weight: 800; }
+.profile-hero-sub { font-size: 22rpx; color: #E5EEE2; margin-top: 6rpx; }
+.profile-section { background: #fff; border: 1rpx solid #E4EAE0; margin-top: 22rpx; border-radius: 26rpx; padding: 8rpx 26rpx; }
+.profile-section-heading { font-size: 26rpx; font-weight: 800; padding: 24rpx 0 6rpx; }
+.profile-row { min-height: 118rpx; border-bottom: 1rpx solid #EEF1EA; display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }
+.profile-row:last-child { border-bottom: 0; }
+.profile-row-title { font-size: 26rpx; font-weight: 700; }
+.profile-row-sub { font-size: 20rpx; color: #8A938A; margin-top: 6rpx; }
+.profile-row > text { color: #34765B; font-size: 21rpx; font-weight: 700; white-space: nowrap; }
+.compliance-note { margin-top: 24rpx; border-radius: 22rpx; background: #E6EEE1; padding: 24rpx; color: #596D54; font-size: 22rpx; line-height: 1.7; }
+.compliance-title { font-size: 25rpx; font-weight: 800; color: #26352E; margin-bottom: 8rpx; }
+.profile-link { text-align: center; border-radius: 22rpx; background: #34765B; color: #fff; padding: 26rpx; margin-top: 24rpx; font-size: 25rpx; font-weight: 700; }
+.profile-footer { text-align: center; color: #8A938A; font-size: 19rpx; letter-spacing: 2rpx; margin-top: 40rpx; }
+.owner-id { padding: 16rpx 0 26rpx; color: #6B756C; font-size: 20rpx; word-break: break-all; }
 .owner-id view { margin-top: 14rpx; color: #34765B; font-weight: 700; }
-page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
-.small-kicker, .title-period, .profile-row > text { color: #34765B; }
-.page-title { font-size: 46rpx; }
-.page-sub, .profile-row-sub { color: #66736C; }
-.profile-hero, .profile-link { background: #34765B; }
-.profile-stamp { background: #F6D781; color: #26352E; font-size: 29rpx; letter-spacing: 2rpx; }
-.profile-hero-sub { color: #E5EEE2; font-size: 22rpx; }
-.profile-section { border: 1rpx solid #E6EAE0; }
-.profile-row-title { font-size: 26rpx; }
-.compliance-note { background: #E6EEE1; color: #596D54; }
-.compliance-title { color: #26352E; }
