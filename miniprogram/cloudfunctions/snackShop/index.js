@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 const cloud = require('wx-server-sdk');
+const cloudbase = require('@cloudbase/node-sdk');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
+// 移动端（RN / Web）没有微信上下文，登录身份从 CloudBase 认证里取，与 snackAdmin 一致
+const cloudbaseAuth = cloudbase.init().auth();
 const products = db.collection('snack_products_v1');
 const orders = db.collection('snack_orders_v1');
 const shopSettings = db.collection('snack_shop_settings_v1');
@@ -669,15 +672,50 @@ function friendlyMessage(error) {
   return raw || '服务暂不可用';
 }
 
-exports.main = async (event) => {
-  const openid = cloud.getWXContext().OPENID;
-  if (!openid) return { ok: false, message: '请在微信小程序中打开' };
+// 未登录游客允许调用的只读接口；其余一律拒绝，避免越权写入
+const GUEST_ACTIONS = new Set(['getCatalog', 'listPosts', 'getPost', 'listComments', 'listShares', 'getShare']);
+const GUEST_UID = 'guest';
+// 不同调用链路（小程序 / RN / Web 云调用）把登录身份放在不同位置，这里一并取，
+// 取到任意一个可信来源即可；身份必须由服务端读取，绝不能信任客户端传入的字段
+function cloudbaseUid(context) {
+  let uid = '';
+  try { uid = (cloudbaseAuth.getUserInfo && cloudbaseAuth.getUserInfo())?.uid || ''; } catch (e) { /* 忽略，走 context 兜底 */ }
+  if (!uid && context) {
+    const info = context.userInfo || {};
+    uid = info.uid || info.userId || (context.cloudbaseContext && context.cloudbaseContext.uid) || '';
+  }
+  return uid;
+}
+
+exports.main = async (event, context) => {
+  const action = event && event.action;
+  let openid = (cloud.getWXContext() || {}).OPENID || '';
+  let identitySource = 'wechat';
+  if (!openid) {
+    const uid = cloudbaseUid(context);
+    if (uid) {
+      openid = `rn_${uid}`; // 与微信 openid 区分，避免跨端身份串号
+      identitySource = 'cloudbase';
+    } else if (process.env.MOBILE_GUEST_READ === '1' && GUEST_ACTIONS.has(action)) {
+      openid = GUEST_UID;
+      identitySource = 'guest';
+    } else {
+      return { ok: false, message: '请在微信小程序中打开，或在移动端先登录' };
+    }
+  }
+  if (identitySource === 'guest' && !GUEST_ACTIONS.has(action)) {
+    return { ok: false, message: '游客仅可浏览，请先登录后再操作' };
+  }
+  if (identitySource !== 'wechat') {
+    console.log('snackShop non-wechat identity', { action, identitySource });
+  }
   const input = event && event.data && typeof event.data === 'object' ? event.data : {};
   try {
     await ensureCollections();
     const settings = await readSettings();
-    const admin = owner(openid, settings);
-    switch (event && event.action) {
+    // 店主身份只在小程序链路下判定，移动端用户一律按普通用户处理
+    const admin = identitySource === 'wechat' && owner(openid, settings);
+    switch (action) {
       case 'getContext': return { ok: true, data: { isOwner: admin, ...publicSettings(settings), ownOpenid: openid } };
       case 'getProfile': return { ok: true, data: await getProfile(openid) };
       case 'saveProfile': return { ok: true, data: await saveProfile(openid, input) };
