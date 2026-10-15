@@ -1,5 +1,5 @@
 @import "../../styles/snack.wxss";
-.checkout-page { padding-bottom: 240rpx; }
+.checkout-page { padding-bottom: calc(200rpx + env(safe-area-inset-bottom)); }
 .compliance-banner { margin-bottom: 20rpx; padding: 16rpx 20rpx; border-radius: 18rpx; background: #F1EFE5; color: #6C766B; font-size: 19rpx; line-height: 1.6; }
 .preview-warning { background: #FBE6D6; color: #8A5A33; border-radius: 18rpx; padding: 20rpx 22rpx; font-size: 22rpx; line-height: 1.55; margin-bottom: 20rpx; }
 .form-card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 6rpx 26rpx 20rpx; margin-bottom: 18rpx; }
@@ -12,7 +12,9 @@
 .form-field input { flex: 1; text-align: right; color: #26352E; font-size: 22rpx; }
 .delivery-selector { border-bottom: 1rpx solid #EEF1EA; }
 .picker-value { color: #4C5B50; }
-.checkout-item { display: flex; align-items: center; justify-content: space-between; padding: 14rpx 0; font-size: 22rpx; color: #5C685D; }
+.checkout-item { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; padding: 14rpx 0; font-size: 22rpx; color: #5C685D; }
+.checkout-item text:first-child { flex: 1; min-width: 0; }
+.checkout-item text:last-child { flex-shrink: 0; }
 .checkout-total { border-top: 1rpx solid #EEF1EA; padding: 22rpx 0 6rpx; display: flex; justify-content: space-between; font-size: 27rpx; font-weight: 800; color: #26352E; }
 .checkout-total text:last-child { color: #AF441F; }
 .checkout-footnote { padding: 4rpx 0 20rpx; color: #8A938A; text-align: right; font-size: 19rpx; }

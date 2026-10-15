@@ -1,0 +1,22 @@
+@import "../../styles/snack.wxss";
+.edit-page { padding-bottom: calc(80rpx + env(safe-area-inset-bottom)); }
+
+.form-card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 26rpx 24rpx; margin-bottom: 20rpx; }
+.card-title { font-size: 27rpx; font-weight: 800; margin-bottom: 18rpx; }
+
+.avatar-wrap { display: flex; align-items: center; }
+.avatar-button { width: 148rpx; height: 148rpx; padding: 0; margin: 0; border-radius: 50%; overflow: hidden; background: #F6D781; flex-shrink: 0; }
+.avatar-button::after { border: none; }
+.avatar-image { width: 100%; height: 100%; display: block; }
+.avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #26352E; font-size: 46rpx; font-weight: 800; }
+.avatar-copy { flex: 1; min-width: 0; padding-left: 24rpx; }
+.avatar-hint { font-size: 22rpx; color: #6B756C; line-height: 1.6; }
+.avatar-remove { margin-top: 12rpx; display: inline-block; font-size: 21rpx; color: #B4593A; padding: 8rpx 0; }
+
+.nickname-input { width: 100%; box-sizing: border-box; min-height: 84rpx; padding: 0 20rpx; border-radius: 18rpx; background: #F4F6F1; font-size: 26rpx; }
+.hint { font-size: 20rpx; color: #8A938A; margin-top: 14rpx; line-height: 1.6; }
+
+.error-line { padding: 16rpx 20rpx; border-radius: 16rpx; background: #FBE6D6; color: #8A5A33; font-size: 22rpx; line-height: 1.5; margin-bottom: 18rpx; }
+.submit { width: 100%; margin-top: 12rpx; }
+.submit.is-disabled { background: #B7C2B9; }
+.foot-note { margin-top: 20rpx; text-align: center; color: #8A938A; font-size: 20rpx; line-height: 1.6; }

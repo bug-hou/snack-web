@@ -11,7 +11,7 @@ button::after { border: none; }
 .textarea { width: 100%; box-sizing: border-box; min-height: 180rpx; padding: 18rpx 20rpx; border-radius: 18rpx; background: #F4F6F1; font-size: 24rpx; }
 .field { display: flex; align-items: center; margin-top: 16rpx; }
 .label { width: 150rpx; flex-shrink: 0; font-size: 22rpx; color: #6B756C; }
-.options { display: flex; }
+.options { display: flex; flex-wrap: wrap; }
 .option { padding: 14rpx 30rpx; margin-right: 12rpx; border-radius: 30rpx; background: #ECEEE5; color: #5C685D; font-size: 23rpx; }
 .option.chosen { background: #34765B; color: #fff; }
 .hint { font-size: 20rpx; color: #8A938A; margin-top: 12rpx; line-height: 1.5; }

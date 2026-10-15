@@ -6,7 +6,7 @@ button::after { border: none; }
 .errand-head { margin-bottom: 24rpx; }
 .errand-title { font-size: 40rpx; font-weight: 800; }
 .errand-sub { font-size: 23rpx; color: #66736C; margin-top: 8rpx; }
-.status-bar { display: flex; align-items: center; margin-top: 16rpx; padding: 10rpx 18rpx; border-radius: 22rpx; background: #F1E4D6; color: #8A5A33; font-size: 21rpx; }
+.status-bar { display: flex; flex-wrap: wrap; align-items: center; margin-top: 16rpx; padding: 10rpx 18rpx; border-radius: 22rpx; background: #F1E4D6; color: #8A5A33; font-size: 21rpx; }
 .status-dot { width: 12rpx; height: 12rpx; border-radius: 50%; background: #C08B57; margin-right: 10rpx; flex-shrink: 0; }
 .status-bar.on { background: #E6EEE1; color: #34765B; }
 .status-bar.on .status-dot { background: #34765B; }

@@ -9,6 +9,7 @@
     "pages/snack-address/index",
     "pages/snack-orders/index",
     "pages/snack-profile/index",
+    "pages/snack-profile-edit/index",
     "pages/community-service/index",
     "pages/community-errand/index",
     "pages/community-share/index",

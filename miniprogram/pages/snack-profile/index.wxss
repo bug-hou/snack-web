@@ -1,7 +1,10 @@
 @import "../../styles/snack.wxss";
 .profile-page { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
 .profile-hero { border-radius: 26rpx; min-height: 180rpx; background: #34765B; display: flex; gap: 28rpx; align-items: center; padding: 28rpx; color: #fff; }
-.profile-stamp { width: 110rpx; height: 110rpx; border-radius: 22rpx; background: #F6D781; color: #26352E; font-size: 29rpx; font-weight: 800; letter-spacing: 2rpx; text-align: center; display: flex; align-items: center; justify-content: center; transform: rotate(-7deg); }
+.profile-avatar { width: 110rpx; height: 110rpx; border-radius: 50%; overflow: hidden; background: #F6D781; color: #26352E; font-size: 38rpx; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.avatar-image { width: 100%; height: 100%; display: block; }
+.profile-hero-copy { flex: 1; min-width: 0; }
+.profile-edit { flex-shrink: 0; padding-left: 16rpx; font-size: 21rpx; color: #E5EEE2; font-weight: 700; }
 .profile-hero-title { font-size: 33rpx; font-weight: 800; }
 .profile-hero-sub { font-size: 22rpx; color: #E5EEE2; margin-top: 6rpx; }
 .profile-section { background: #fff; border: 1rpx solid #E4EAE0; margin-top: 22rpx; border-radius: 26rpx; padding: 8rpx 26rpx; }

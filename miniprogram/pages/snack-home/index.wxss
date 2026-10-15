@@ -36,7 +36,7 @@ page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microso
 .service-icon image { width: 42rpx; height: 42rpx; }
 .service-copy { flex: 1; min-width: 0; overflow: hidden; }
 .service-title-row { display: flex; align-items: center; }
-.service-title { font-size: 28rpx; font-weight: 800; }
+.service-title { font-size: 28rpx; font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .service-state { margin-left: 12rpx; padding: 4rpx 12rpx; border-radius: 20rpx; font-size: 18rpx; font-weight: 700; flex-shrink: 0; background: #EFEFEA; color: #8A938A; }
 .service-state.on { background: #E6EEE1; color: #34765B; }
 .service-state.wait { background: #F1E4D6; color: #8A5A33; }
@@ -51,7 +51,7 @@ page { background: #F8F6F1; color: #26352E; font-family: 'PingFang SC', 'Microso
 .catalog-head { margin-top: 44rpx; }
 /* 从左到右排列：不足 3 个时靠左对齐，不要用 space-between 把卡片撑到两端 */
 .share-row { display: flex; flex-wrap: wrap; justify-content: flex-start; }
-.share-card { width: calc(33.33% - 8rpx); margin-right: 12rpx; background: #fff; border: 1rpx solid #E4EAE0; border-radius: 22rpx; padding: 12rpx; overflow: hidden; }
+.share-card { width: calc((100% - 24rpx) / 3); margin-right: 12rpx; background: #fff; border: 1rpx solid #E4EAE0; border-radius: 22rpx; padding: 12rpx; overflow: hidden; }
 .share-card:last-child { margin-right: 0; }
 .share-art { height: 150rpx; border-radius: 16rpx; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #EDEFE6; color: #7C877D; font-size: 26rpx; font-weight: 800; }
 .share-image { width: 100%; height: 100%; display: block; }

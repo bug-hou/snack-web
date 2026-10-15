@@ -12,7 +12,7 @@
 .cart-name { font-size: 25rpx; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cart-spec { font-size: 19rpx; color: #8A938A; margin: 6rpx 0; }
 .cart-price { font-size: 26rpx; color: #AF441F; font-weight: 800; }
-.cart-controls { display: flex; gap: 10rpx; align-items: center; font-size: 22rpx; }
+.cart-controls { display: flex; gap: 10rpx; align-items: center; font-size: 22rpx; flex-shrink: 0; }
 .cart-btn { width: 44rpx; height: 44rpx; border-radius: 50%; background: #ECEEE5; display: flex; align-items: center; justify-content: center; color: #4C5B50; font-size: 24rpx; }
 .cart-btn.plus { background: #34765B; color: #fff; }
 .cart-summary { padding: 14rpx 26rpx; }

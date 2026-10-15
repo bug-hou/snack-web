@@ -10,6 +10,20 @@ const orders = db.collection('snack_orders_v1');
 const addresses = db.collection('snack_addresses_v1');
 const shares = db.collection('snack_shares_v1');
 const _ = db.command;
+// 社区相关表（shares / posts / comments）可能是后加的，首次调用时按需补建
+const COLLECTION_NAMES = ['snack_shop_settings_v1', 'snack_products_v1', 'snack_orders_v1',
+  'snack_addresses_v1', 'snack_shares_v1', 'snack_posts_v1', 'snack_comments_v1'];
+let collectionsReady = null;
+function ensureCollections() {
+  if (!collectionsReady) {
+    collectionsReady = Promise.all(COLLECTION_NAMES.map(name =>
+      db.createCollection(name).catch(error => {
+        console.log('createCollection skipped', name, error && error.errCode);
+      })
+    )).catch(() => {});
+  }
+  return collectionsReady;
+}
 const $ = _.aggregate;
 const USER_PAGE_SIZE = 20;
 const USER_SCAN_LIMIT = 2000;
@@ -244,6 +258,7 @@ exports.main = async (event, context) => {
       return { ok: false, message: '无权访问商家管理' };
     }
     const input = event && event.data && typeof event.data === 'object' ? event.data : {};
+    await ensureCollections();
     switch (event && event.action) {
       case 'getDashboard': return { ok: true, data: { settings: await settings() } };
       case 'getOrders': return { ok: true, data: await getOrders(input) };

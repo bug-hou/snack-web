@@ -9,7 +9,24 @@ const addresses = db.collection('snack_addresses_v1');
 const shares = db.collection('snack_shares_v1');
 const posts = db.collection('snack_posts_v1');
 const comments = db.collection('snack_comments_v1');
+const profiles = db.collection('snack_profiles_v1');
 const dbCommand = db.command;
+// 社区功能是后加的，shares / posts / comments 三张表可能还没在控制台建过；
+// 云函数持有管理端权限，这里在首次调用时按需补建，省去手动建表的步骤
+const COLLECTION_NAMES = ['snack_products_v1', 'snack_orders_v1', 'snack_shop_settings_v1',
+  'snack_addresses_v1', 'snack_shares_v1', 'snack_posts_v1', 'snack_comments_v1', 'snack_profiles_v1'];
+let collectionsReady = null;
+function ensureCollections() {
+  if (!collectionsReady) {
+    collectionsReady = Promise.all(COLLECTION_NAMES.map(name =>
+      db.createCollection(name).catch(error => {
+        // 集合已存在（或当前环境不允许自动建表）时忽略，由后续查询自行报错
+        console.log('createCollection skipped', name, error && error.errCode);
+      })
+    )).catch(() => {});
+  }
+  return collectionsReady;
+}
 const DEFAULT_SETTINGS = { ordersEnabled: false, businessStart: '09:00', businessEnd: '22:00', deliveryStart: '09:00', deliveryEnd: '22:00', deliveryFeeCents: 0, minOrderCents: 0, ownerOpenid: '', ownerWechat: '',
   expressEnabled: false, expressFollowShop: false, expressBaseFeeCents: 300, expressExtraFeeCents: 100, expressLargeFeeCents: 100, expressStart: '09:00', expressEnd: '21:00', expressStations: [],
   purchaseEnabled: false, purchaseFeeCents: 500, purchaseStart: '09:00', purchaseEnd: '21:00', purchaseStore: '京东便利店',
@@ -617,15 +634,53 @@ async function deleteComment(openid, input, admin) {
   return { id };
 }
 
+/* ---------- 个人资料：昵称与头像 ---------- */
+// 头像只允许使用云存储地址，避免前端塞入任意外链
+const AVATAR_IMAGE = /^cloud:\/\/[a-zA-Z0-9._-]+\/avatar\/[a-f0-9]{32}\.(jpg|jpeg|png|webp)$/;
+async function getProfile(openid) {
+  const { data } = await profiles.doc(openid).get().catch(() => ({ data: null }));
+  return {
+    nickName: data && typeof data.nickName === 'string' ? data.nickName : '',
+    avatarUrl: data && typeof data.avatarUrl === 'string' ? data.avatarUrl : ''
+  };
+}
+async function saveProfile(openid, input) {
+  const nickName = typeof input.nickName === 'string' ? input.nickName.trim().slice(0, 24) : '';
+  if (nickName && nickName.length < 2) throw new Error('昵称至少 2 个字');
+  if (nickName) await forumSecCheck(`昵称 ${nickName}`);
+  const avatarUrl = typeof input.avatarUrl === 'string' ? input.avatarUrl.trim() : '';
+  if (avatarUrl && !AVATAR_IMAGE.test(avatarUrl)) throw new Error('头像不正确，请重新上传');
+  const data = { nickName, avatarUrl, updatedAt: Date.now() };
+  const { data: existing } = await profiles.doc(openid).get().catch(() => ({ data: null }));
+  if (existing) {
+    await profiles.doc(openid).update({ data });
+  } else {
+    await profiles.doc(openid).set({ data: { _id: openid, ...data, createdAt: Date.now() } });
+  }
+  return data;
+}
+
+// 集合缺失时云开发返回的是英文错误，转成用户能看懂的提示
+function friendlyMessage(error) {
+  const raw = (error && (error.message || error.errMsg)) || '';
+  if ((error && error.errCode === -502005) || /collection.*not\s*exist|db not exist/i.test(raw)) {
+    return '社区数据还在初始化，请稍后重试';
+  }
+  return raw || '服务暂不可用';
+}
+
 exports.main = async (event) => {
   const openid = cloud.getWXContext().OPENID;
   if (!openid) return { ok: false, message: '请在微信小程序中打开' };
   const input = event && event.data && typeof event.data === 'object' ? event.data : {};
   try {
+    await ensureCollections();
     const settings = await readSettings();
     const admin = owner(openid, settings);
     switch (event && event.action) {
       case 'getContext': return { ok: true, data: { isOwner: admin, ...publicSettings(settings), ownOpenid: openid } };
+      case 'getProfile': return { ok: true, data: await getProfile(openid) };
+      case 'saveProfile': return { ok: true, data: await saveProfile(openid, input) };
       case 'getCatalog': return { ok: true, data: await getCatalog() };
       case 'listAddresses': return { ok: true, data: await listAddresses(openid) };
       case 'saveAddress': return { ok: true, data: await saveAddress(openid, input) };
@@ -653,6 +708,6 @@ exports.main = async (event) => {
     }
   } catch (error) {
     console.error('snackShop request failed', event && event.action, error);
-    return { ok: false, message: error.message || '服务暂不可用' };
+    return { ok: false, message: friendlyMessage(error) };
   }
 };

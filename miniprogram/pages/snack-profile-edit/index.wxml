@@ -1,0 +1,31 @@
+<view class="snack-page edit-page">
+  <view class="page-lead">
+    <view class="small-kicker">MY PROFILE / 个人资料</view>
+    <view class="page-title">让邻居认识你<text class="title-period">.</text></view>
+    <view class="page-sub">头像与昵称只在「我的」展示，广场和闲置仍保持匿名</view>
+  </view>
+
+  <view class="form-card">
+    <view class="card-title">头像</view>
+    <view class="avatar-wrap">
+      <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image wx:if="{{avatarUrl}}" class="avatar-image" src="{{avatarUrl}}" mode="aspectFill"/>
+        <view wx:else class="avatar-fallback">{{initial}}</view>
+      </button>
+      <view class="avatar-copy">
+        <view class="avatar-hint">{{uploading ? '头像上传中…' : '点击左侧头像即可更换'}}</view>
+        <view wx:if="{{avatarUrl}}" class="avatar-remove" bindtap="removeAvatar">移除头像</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-card">
+    <view class="card-title">昵称</view>
+    <input class="nickname-input" type="nickname" value="{{nickName}}" maxlength="24" placeholder="点击填写昵称" bindinput="onNickName"/>
+    <view class="hint">留空则显示默认称呼；昵称会经过一次内容安全校验。</view>
+  </view>
+
+  <view wx:if="{{error}}" class="error-line">{{error}}</view>
+  <view class="primary-action submit {{saving || uploading ? 'is-disabled' : ''}}" bindtap="save">{{saving ? '保存中…' : '保存资料'}}</view>
+  <view class="foot-note">资料保存在云端，仅本人可见，不会展示联系方式。</view>
+</view>

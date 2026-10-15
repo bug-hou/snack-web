@@ -22,11 +22,11 @@
 
 .order-card { background: #fff; border: 1rpx solid #E4EAE0; border-radius: 26rpx; padding: 26rpx 24rpx 22rpx; margin-bottom: 20rpx; }
 .card-top { display: flex; align-items: center; justify-content: space-between; }
-.shop-line { display: flex; align-items: center; gap: 12rpx; }
-.shop-mark { width: 44rpx; height: 44rpx; border-radius: 14rpx; background: #EDF3E9; color: #34765B; font-size: 22rpx; font-weight: 800; display: flex; align-items: center; justify-content: center; }
-.shop-name { font-size: 27rpx; font-weight: 800; }
-.shop-arrow { color: #9AA49A; font-size: 28rpx; }
-.order-status { font-size: 23rpx; font-weight: 700; color: #34765B; }
+.shop-line { display: flex; align-items: center; gap: 12rpx; flex: 1; min-width: 0; }
+.shop-mark { width: 44rpx; height: 44rpx; border-radius: 14rpx; background: #EDF3E9; color: #34765B; font-size: 22rpx; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.shop-name { font-size: 27rpx; font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shop-arrow { color: #9AA49A; font-size: 28rpx; flex-shrink: 0; }
+.order-status { font-size: 23rpx; font-weight: 700; color: #34765B; flex-shrink: 0; margin-left: 16rpx; }
 .status-completed { color: #8A938A; }
 .status-cancelled { color: #8A938A; }
 .status-delivering { color: #ED6A38; }
@@ -56,7 +56,7 @@
 .card-foot { margin-top: 14rpx; padding-top: 18rpx; border-top: 1rpx solid #EEF1EA; }
 .foot-sum { display: flex; justify-content: flex-end; align-items: baseline; gap: 10rpx; font-size: 22rpx; color: #6B756C; }
 .foot-total { font-size: 32rpx; font-weight: 800; color: #AF441F; }
-.foot-actions { display: flex; justify-content: flex-end; gap: 14rpx; margin-top: 18rpx; }
+.foot-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 14rpx; margin-top: 18rpx; }
 .ghost-btn, .solid-btn { padding: 12rpx 28rpx; border-radius: 999rpx; font-size: 23rpx; border: 1rpx solid #DDE3D8; color: #4C5B50; }
 .solid-btn { border-color: #34765B; background: #34765B; color: #fff; font-weight: 700; }
 
