@@ -18,6 +18,8 @@
   --card: #FFFFFF;
   --dock-h: 3.44rem;
   --radius: 0.81rem;
+  /* 内容栏宽度：手机 480 → 平板 720 → 小桌面 960 → 宽屏 1120 */
+  --app-w: 480px;
 }
 
 html {
@@ -42,12 +44,11 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .app {
   position: relative;
-  max-width: 480px;
+  width: min(100%, var(--app-w));
   min-height: 100vh;
   margin: 0 auto;
   background: var(--bg);
   box-shadow: 0 0 2.5rem rgba(38, 53, 46, 0.08);
-  overflow-x: hidden;
 }
 
 .screen { min-height: 100vh; }
@@ -57,16 +58,14 @@ input, textarea, select { font: inherit; color: inherit; }
   padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 1rem);
 }
 
-/* 固定在底部的一层：桌面端与中间栏对齐 */
+/* 固定在底部的一层：始终与中间内容栏同宽并居中 */
 .dock {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
   bottom: 0;
+  width: min(100%, var(--app-w));
+  transform: translateX(-50%);
   z-index: 40;
-}
-@media (min-width: 480px) {
-  .dock { left: calc(50% - 240px); right: calc(50% - 240px); }
 }
 .dock-raised,
 .dock-tabbed { bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 0.5rem); }
@@ -1893,3 +1892,143 @@ input, textarea, select { font: inherit; color: inherit; }
 .avatar-hint { font-size: 0.66rem; color: var(--muted2); }
 .avatar-remove { margin-top: 0.31rem; border: 0; background: none; color: var(--green); font-size: 0.66rem; cursor: pointer; padding: 0; }
 .edit-page .primary-action.submit { margin-top: 1rem; }
+
+/* ================= 响应式：平板与桌面 ================= */
+
+/* TabBar 内部：手机上按钮直接排布，宽屏时走顶部导航 */
+.tabbar-brand { display: none; }
+.tabbar-links { display: contents; }
+
+/* 鼠标设备才加 hover，避免移动端点击后残留高亮 */
+@media (hover: hover) {
+  .service-card:hover { background: #F4F6F1; }
+  .post-card:hover, .item-card:hover, .share-card:hover, .forum-entry:hover { background: #F4F6F1; }
+  .chip:hover { background: #E2E7DC; }
+  .chip.chosen:hover, .chip.selected:hover { background: var(--green); }
+  .ghost-btn:hover { border-color: var(--green); color: var(--green); }
+  .solid-btn:hover { background: #2C6550; }
+  .primary-action:hover { background: #2C6550; }
+  .tabbar-item:hover { color: var(--green); }
+}
+
+/* 平板：内容栏放宽，商品三列 */
+@media (min-width: 768px) {
+  :root { --app-w: 720px; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-art { height: 8rem; }
+  .share-row .share-art { height: 6rem; }
+  .modal { max-width: 24rem; }
+}
+
+/* 小桌面：四列商品、服务卡横排，列表类页面双列 */
+@media (min-width: 1024px) {
+  :root { --app-w: 960px; }
+
+  .screen-padded { padding: 0 1.5rem 3rem; }
+  .screen-tabbed { padding: 0 1.5rem 3rem; }
+
+  /* 底部 TabBar 改成顶部导航栏 */
+  .tabbar {
+    top: 0;
+    bottom: auto;
+    height: 3.75rem;
+    padding: 0 1.5rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 0;
+    border-bottom: 1px solid var(--green-line);
+    background: rgba(248, 246, 241, 0.94);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+  }
+  .tabbar-brand { display: flex; align-items: center; gap: 0.5rem; }
+  .tabbar-brand .brand-mark { width: 2rem; height: 2rem; margin: 0; font-size: 0.94rem; }
+  .tabbar-brand .brand-name { font-size: 1rem; }
+  .tabbar-links { display: flex; gap: 0.25rem; }
+  .tabbar-item {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 0.38rem;
+    padding: 0.5rem 0.88rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+  }
+  .tabbar-item.active { background: var(--green-soft); }
+  .tabbar-item:hover { background: #E2E7DC; }
+
+  /* 顶部导航占位；底部悬浮条不再被 TabBar 顶起，但仍要给它留位置 */
+  .screen-tabbed { padding-top: 4.5rem; }
+  .home-page { padding-bottom: 6rem; }
+  .forum-page { padding-bottom: 7rem; }
+  .home-page, .forum-page, .profile-page { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .dock-raised, .dock-tabbed { bottom: 1rem; }
+  .floating-cart.dock { width: min(100% - 3rem, 26rem); }
+  .publish-button.dock { width: min(100% - 3rem, 20rem); }
+
+  /* 首页：服务卡横排，商品四列 */
+  .product-grid { grid-template-columns: repeat(4, 1fr); }
+  .product-art { height: 7.5rem; }
+  .service-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+  .service-card { border-top: 0; border-left: 1px solid var(--line); }
+  .service-card:first-child { border-left: 0; }
+  .community-intro { padding: 1.25rem; }
+  .neighbour-art { width: 6rem; }
+  .art-circle { width: 4.25rem; height: 4.25rem; }
+  .art-circle.small { width: 2.75rem; height: 2.75rem; }
+
+  /* 列表页双列：标题、筛选、提示类元素整行贯通 */
+  .forum-page, .share-page, .orders-page, .profile-page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+    align-content: start;
+  }
+  .forum-page .forum-head,
+  .forum-page .chip-scroll,
+  .forum-page .forum-notice,
+  .forum-page .message-line,
+  .forum-page .more-button,
+  .forum-page .forum-empty,
+  .share-page .share-head,
+  .share-page .scope-tabs,
+  .share-page .message-line,
+  .share-page .share-empty,
+  .orders-page .orders-head,
+  .orders-page .banner,
+  .orders-page .wechat-tip,
+  .orders-page .order-tabs,
+  .orders-page .message-line,
+  .orders-page .spinner-wrap,
+  .orders-page .empty-state,
+  .orders-page .order-bottom,
+  .profile-page .page-lead,
+  .profile-page .profile-hero,
+  .profile-page .compliance-note,
+  .profile-page .profile-link,
+  .profile-page .profile-footer { grid-column: 1 / -1; }
+  .post-card { margin-top: 0; margin-bottom: 0.75rem; }
+  .share-page .item-card { margin-bottom: 0.75rem; }
+  .profile-page .profile-section { margin-top: 0.75rem; }
+
+  /* 表单与详情：限制阅读宽度，避免长行 */
+  .form-page, .detail-page, .errand-page, .address-page, .service-page, .edit-page { max-width: 46rem; margin: 0 auto; }
+  .detail-page .post-content, .detail-page .info-desc { font-size: 0.84rem; }
+  .toast-layer { bottom: 5rem; }
+}
+
+/* 宽屏：进一步放宽内容栏 */
+@media (min-width: 1360px) {
+  :root { --app-w: 1120px; }
+  .product-grid { grid-template-columns: repeat(5, 1fr); }
+  .forum-page, .share-page, .orders-page, .profile-page { gap: 0 1.25rem; }
+}
+
+/* 超宽屏时内容不再无限拉伸，保持舒适阅读宽度 */
+@media (min-width: 1600px) {
+  :root { --app-w: 1200px; }
+}

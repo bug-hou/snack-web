@@ -22,21 +22,28 @@ export function NavBar({ title, onBack, right, fallback = '/' }) {
 export function TabBar({ path }) {
   return (
     <nav className="tabbar dock" aria-label="主导航">
-      {TABS.map(tab => {
-        const active = path === tab.path;
-        return (
-          <button
-            key={tab.path}
-            type="button"
-            className={`tabbar-item ${active ? 'active' : ''}`}
-            onClick={() => redirect(tab.path)}
-            aria-current={active ? 'page' : undefined}
-          >
-            <Icon name={tab.icon} size={22} />
-            <span>{tab.label}</span>
-          </button>
-        );
-      })}
+      {/* 宽屏时顶部导航会显示品牌，手机上隐藏 */}
+      <div className="tabbar-brand">
+        <span className="brand-mark">里</span>
+        <span className="brand-name">爱尚里生活</span>
+      </div>
+      <div className="tabbar-links">
+        {TABS.map(tab => {
+          const active = path === tab.path;
+          return (
+            <button
+              key={tab.path}
+              type="button"
+              className={`tabbar-item ${active ? 'active' : ''}`}
+              onClick={() => redirect(tab.path)}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon name={tab.icon} size={22} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }

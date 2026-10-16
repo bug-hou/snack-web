@@ -1,11 +1,18 @@
 <view class="community-page">
   <view class="community-header">
     <view class="community-brand"><view class="brand-mark">里</view><view><view class="brand-name">爱尚里生活</view><view class="brand-kicker">家门口的小事，一起办好</view></view></view>
-    <view aria-role="button" class="header-orders" bindtap="goOrders" aria-label="查看我的需求登记"><image src="/images/community/clipboard-list.svg"/><text>我的登记</text></view>
+    <view aria-role="button" class="header-orders" bindtap="goOrders" aria-label="查看我的需求"><image src="/images/community/clipboard-list.svg"/><text>我的需求</text></view>
   </view>
 
   <view class="shop-content">
     <view class="compliance-banner">本页为社区便民信息展示，只提供商品信息与参考价，不提供在线下单、在线支付与交易担保。有需要请先加入需求清单，再由店家线下与您确认。</view>
+
+    <!-- UGC 与跑腿功能不在此提供，引导到网站 -->
+    <view class="compliance-banner">邻里广场、闲置分享、跑腿代取等功能请在浏览器中访问网站使用。</view>
+    <view aria-role="button" class="publish-button" bindtap="copyWebsite" aria-label="复制网站地址">
+      <image src="/images/community/package-open.svg"/>
+      <text>复制网站地址 · {{website}}</text>
+    </view>
 
     <view aria-role="button" class="address-entry" bindtap="goAddress" aria-label="管理收货地址">
       <image class="address-pin" src="/images/community/map-pin.svg"/>
@@ -17,59 +24,17 @@
       <view class="intro-copy">
         <view class="intro-kicker">YOUR NEIGHBOURHOOD, CLOSER.</view>
         <view class="intro-title">生活的小事<text>，</text><view>不用跑远。</view></view>
-        <view class="intro-desc">取快递 · 买日常 · 分享好物</view>
+        <view class="intro-desc">选好商品 · 加入需求清单 · 线下对接</view>
       </view>
       <view class="neighbour-art" aria-hidden="{{true}}"><view class="art-circle"></view><view class="art-circle small"></view><view class="art-label">HELLO NEIGHBOUR</view></view>
-    </view>
-
-    <view class="service-heading"><text>今天需要什么？</text><text class="service-heading-note">社区服务</text></view>
-    <view class="service-list">
-      <view aria-role="button" wx:for="{{services}}" wx:key="id" class="service-card service-{{item.id}}" data-id="{{item.id}}" bindtap="openService" hover-class="service-pressed" aria-label="{{item.title}}">
-        <view class="service-icon"><image src="/images/community/{{item.icon}}.svg" mode="aspectFit"/></view>
-        <view class="service-copy">
-          <view class="service-title-row">
-            <text class="service-title">{{item.shortTitle}}</text>
-            <text wx:if="{{item.text}}" class="service-state {{item.tone}}">{{item.text}}</text>
-          </view>
-          <view wx:if="{{item.id === 'purchase'}}" class="service-subtitle">京东便利店 · 非官方代买</view>
-          <view wx:else class="service-subtitle">{{item.subtitle}}</view>
-        </view>
-        <text class="service-arrow">›</text>
-      </view>
-    </view>
-
-    <view class="section-head">
-      <view><view class="section-eyebrow">PASS IT ON</view><view class="section-name">邻里闲置</view></view>
-      <view aria-role="button" class="section-link" bindtap="goShares">全部 ›</view>
-    </view>
-    <block wx:if="{{shares.length}}">
-      <view class="share-row">
-        <view wx:for="{{shares}}" wx:key="id" class="share-card" data-id="{{item.id}}" bindtap="openShare">
-          <view class="share-art tone-{{item.tone}}"><image wx:if="{{item.cover}}" class="share-image" src="{{item.cover}}" mode="aspectFill" lazy-load="{{true}}"/><text wx:else>{{item.initials}}</text></view>
-          <view class="share-title">{{item.title}}</view>
-          <view class="share-meta"><text class="share-mode">{{item.modeText}}</text><text class="share-price">{{item.priceText}}</text></view>
-        </view>
-      </view>
-    </block>
-    <view wx:else class="sharing-card" bindtap="loadShares">
-      <view class="sharing-symbol"><image src="/images/community/repeat-2.svg"/></view>
-      <view class="sharing-copy"><view class="sharing-title">让好物，在小区里接力</view><view class="sharing-desc">{{shareHint}}</view></view>
-    </view>
-    <view aria-role="button" class="publish-button" bindtap="goPublish"><image src="/images/community/plus.svg"/><text>发布闲置</text></view>
-
-    <view class="section-head">
-      <view><view class="section-eyebrow">NEIGHBOUR TALK</view><view class="section-name">邻里广场</view></view>
-    </view>
-    <view aria-role="button" class="forum-entry" bindtap="goForum" hover-class="forum-entry-pressed">
-      <view class="forum-entry-copy"><view class="forum-entry-title">和邻居聊两句</view><view class="forum-entry-desc">闲聊 · 互助求助 · 失物招领 · 社区公告</view></view>
-      <text class="forum-entry-arrow">›</text>
     </view>
 
     <view id="community-catalog" class="section-head catalog-head">
       <view><view class="section-eyebrow">DAILY ESSENTIALS</view><view class="section-name">便利铺 · 商品信息</view></view>
       <text wx:if="{{shopStatus}}" class="shop-state">{{shopStatus}}</text>
     </view>
-    <view class="catalog-caption">原口袋便利铺商品 · 与便利店代买服务分开</view>
+    <view class="catalog-caption">选好后加入需求清单，由店家线下与您确认</view>
+
     <scroll-view wx:if="{{featured.length}}" scroll-x="{{true}}" class="featured-scroll" show-scrollbar="{{false}}">
       <view wx:for="{{featured}}" wx:key="id" class="featured-item">
         <view class="featured-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="featured-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="mini-pack"><text>{{item.initials}}</text></view></view>
@@ -77,8 +42,10 @@
         <view class="featured-price">¥{{item.price}} <view aria-role="button" class="featured-add" data-id="{{item.id}}" bindtap="add" aria-label="加入需求清单">＋</view></view>
       </view>
     </scroll-view>
+
     <view class="search-box"><view class="search-icon"></view><input class="search-input" value="{{keyword}}" placeholder="搜索鸡蛋、牛奶、日用品" placeholder-class="search-placeholder" bindinput="onSearch" confirm-type="search"/><text wx:if="{{keyword}}" class="clear-search" bindtap="clearSearch">清除</text></view>
     <scroll-view scroll-x="{{true}}" class="category-scroll" show-scrollbar="{{false}}"><view wx:for="{{categories}}" wx:key="id" class="category-chip {{activeCategory === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectCategory">{{item.name}}</view></scroll-view>
+
     <view class="product-grid">
       <view wx:for="{{products}}" wx:key="id" class="product-card">
         <view class="product-art tone-{{item.tone}}"><image wx:if="{{item.image}}" class="product-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}"/><view wx:else class="product-pack"><view class="pack-name">{{item.initials}}</view></view><view wx:if="{{item.label}}" class="product-tag">{{item.label}}</view></view>
@@ -89,9 +56,11 @@
         <view wx:else class="want-hint in-list">已在需求清单 · 数量 {{item.quantity}}</view>
       </view>
     </view>
+
     <view wx:if="{{loading}}" class="empty-results">正在加载商品…</view>
     <view wx:elif="{{catalogError}}" class="empty-results" bindtap="retryCatalog">{{catalogError}} · 点击重试</view>
     <view wx:elif="{{products.length === 0}}" class="empty-results">{{keyword ? '没找到这件商品，换个关键词试试' : '暂时没有上架商品，稍后再来看看'}}</view>
+
     <view class="bottom-note">保利爱尚里 · 爱尚里生活</view>
   </view>
 

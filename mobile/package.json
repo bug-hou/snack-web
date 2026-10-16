@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
-    "@cloudbase/adapter-rn": "^1.0.3",
-    "@cloudbase/js-sdk": "^3.10.2",
     "expo": "~57.0.29",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

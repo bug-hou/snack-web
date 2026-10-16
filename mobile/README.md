@@ -1,13 +1,13 @@
 # mobile · 邻里点单 React Native 端（最小骨架）
 
-用于验证 **RN → CloudBase → 云函数 → 云数据库** 全链路是否跑得通的最小可运行工程。
-目标不是做完整 App，而是把三个不确定点一次性验证掉：RN 适配器能不能用、非小程序身份怎么拿、云函数协议能不能直接复用。
+用于验证 **RN → 自建后端（server/）→ MongoDB** 全链路是否跑得通的最小可运行工程。
+目标不是做完整 App，而是验证：RN 能否直连后端、用户名密码登录能否拿到身份、业务协议能否复用。
 
 ## 为什么是 Expo（React Native 原生）而不是 uni-app / Taro
 
 | 方案 | 结论 |
 | --- | --- |
-| **Expo / RN 原生** | ✅ 采用。CloudBase 有官方 RN 适配器（`@cloudbase/adapter-rn`），后端、云函数、数据库、云存储全部直接复用；项目已有 React Web 端，技术栈一致 |
+| **Expo / RN 原生** | ✅ 采用。后端是标准 HTTP 接口，RN 用 `fetch` 直接调用，不需要任何厂商 SDK；项目已有 React Web 端，技术栈一致 |
 | Taro | ❌ RN 端（taro-native-shell）维护状态不稳定，且与现有原生小程序代码不是同一套 |
 | uni-app | ❌ 它的「App 端」不是 React Native，而是自有 nvue/uvue 引擎，等于换技术栈，React 生态无法复用 |
 
@@ -23,11 +23,11 @@
 mobile/
 ├── App.tsx              # 自检页：环境 / 登录 / 链路自检 / 菜单列表
 ├── src/
-│   ├── config.ts        # EXPO_PUBLIC_* 环境变量与校验
-│   ├── cloudbase.ts     # CloudBase 初始化 + 适配器注册 + invoke 封装
-│   ├── session.ts       # 登录（匿名 / 账号密码）与登录态恢复
-│   ├── api.ts           # 云函数接口契约（与小程序 utils + web/src 同协议）
-│   ├── storage.ts       # MMKV 持久化
+│   ├── config.ts        # EXPO_PUBLIC_API_BASE 与校验
+│   ├── client.ts        # HTTP 客户端：令牌、invoke、登录 / 注册
+│   ├── session.ts       # 登录（账号密码 / 注册）与登录态
+│   ├── api.ts           # 接口契约（与 h5/src、web/src 同协议）
+│   ├── storage.ts       # MMKV 持久化（令牌与用户标识）
 │   └── theme.ts         # 与小程序 app.wxss 对齐的设计 token
 └── .env.example
 ```
@@ -36,7 +36,7 @@ mobile/
 
 ```bash
 cd mobile
-cp .env.example .env      # 填写 EXPO_PUBLIC_CLOUDBASE_ENV / REGION / ACCESS_KEY
+cp .env.example .env      # 填写 EXPO_PUBLIC_API_BASE（必须是完整地址）
 npm install
 npm run typecheck         # 类型检查
 npm start                 # 随后按 a(iOS) / a(Android) 启动，或用 Expo Go 扫码
@@ -44,42 +44,43 @@ npm start                 # 随后按 a(iOS) / a(Android) 启动，或用 Expo G
 
 `.env` 改动后必须**重启** `expo start`，Expo 不会热更新环境变量。
 
-### Publishable Key 获取
+### 后端地址怎么填
 
-云开发控制台 → 环境 → **API Key 配置** → 生成 Publishable Key。它可安全暴露在客户端，用于访问公开资源；涉及用户数据时仍需登录。
+RN 的 `fetch` 不支持 `/api` 这种相对路径，必须写完整地址：
 
-## 云函数侧需要的配合
+- 模拟器 / 真机与服务器同一局域网 → `http://192.168.1.100:3000/api`
+- 线上 → `https://api.example.com/api`（必须 HTTPS，否则 iOS 的 ATS 会拦截）
 
-`snackShop` 原先只认微信上下文：
+App 不受浏览器同源策略限制，所以服务端 `CORS_ORIGIN` 对它不生效，
+但别在网关层做来源过滤，否则会把 App 请求一起挡掉。
 
-```js
-const openid = cloud.getWXContext().OPENID;
-if (!openid) return { ok: false, message: '请在微信小程序中打开' };
-```
+## 后端侧的身份
 
-骨架已把它改造成多来源身份解析（与 `snackAdmin` 一致）：
+后端用 JWT 令牌识别用户：
 
-1. 小程序链路 → `cloud.getWXContext().OPENID`（行为不变）
-2. RN / Web 链路 → `@cloudbase/node-sdk` 的 `auth.getUserInfo().uid`，兜底读 `context.userInfo.uid`，前缀 `rn_` 与微信 openid 隔离
-3. 都没有 → 云函数环境变量 `MOBILE_GUEST_READ=1` 时允许**游客只读**（`getCatalog` / 帖子 / 闲置列表），写操作一律拒绝；否则返回「请先登录」
+1. 登录 / 注册 → 后端返回 `token` 与 `user.id`
+2. 客户端把 `token` 存进 MMKV，每次请求带 `Authorization: Bearer <token>`
+3. 需要登录的接口由服务端校验令牌，**不接受客户端传入的用户标识**，否则可伪造身份越权读写他人订单
 
-身份一律由服务端从调用上下文读取，**不接受客户端传入的 uid**，否则可伪造身份越权读写他人订单。
+游客（未登录）可访问只读接口：商品列表、广场帖子、闲置列表；写操作一律返回 401。
+令牌过期或被吊销时客户端会清掉本地登录态并提示重新登录。
 
 ## 验证清单
 
 在自检页逐项确认：
 
-- [ ] 环境卡片三项都显示已配置
-- [ ] 点「匿名登录」能拿到 uid（控制台需先开启匿名登录）
-- [ ] 链路自检显示 `getCatalog 返回 N 个商品`
-- [ ] 菜单列表能渲染出商品名与价格（图片是云存储临时链接）
+- [ ] 环境卡片显示已配置的 API 地址
+- [ ] 注册或登录后，「当前身份」显示用户 ID
+- [ ] 链路自检显示 `GET /products 返回 N 个商品`
+- [ ] 菜单列表能渲染出商品名与价格（图片是 COS 直链）
 
-若自检报「请在微信小程序中打开，或在移动端先登录」，说明云函数还没读到 CloudBase 身份：
-先在云函数日志里看 `snackShop non-wechat identity` 打印的 `identitySource`，再决定是开启匿名登录还是临时开 `MOBILE_GUEST_READ=1`。
+若自检报「网络连接失败」，按顺序排查：
+手机与服务器是否同一局域网、后端是否已启动、服务器防火墙是否放行端口、
+`EXPO_PUBLIC_API_BASE` 是否填了完整地址（RN 不支持相对路径）。
 
 ## 已知限制（骨架阶段）
 
 - 只做了只读链路：菜单 / 广场列表，没有下单、购物车、上传图片
 - 未接入推送（RN 端无法复用小程序订阅消息，需另接极光 / 厂商通道）
 - 未接入微信登录（App 端需微信开放平台移动应用，与小程序 openid 不互通，只能靠 unionid 打通）
-- `snackShop` 改动需重新部署云函数才会生效
+- 后端接口改动需重启服务才会生效

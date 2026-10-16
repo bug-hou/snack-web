@@ -1,11 +1,12 @@
 # 爱尚里生活 · H5 网页版
 
-小程序同款界面的手机网页版，面向邻居（顾客端）。复用小程序的云函数 `snackShop`
-与同一套 CloudBase 数据，小程序审核期间可以先用网页提供服务。
+手机网页版，面向邻居（顾客端）。数据来自自建后端 `server/`（Node + MongoDB，
+部署在 Lighthouse），不再依赖微信云开发。
 
-- 技术栈：React 18 + Vite 6 + `@cloudbase/js-sdk`，纯静态站点，不需要自建服务器
+- 技术栈：React 18 + Vite 6，通过 `fetch` 调用 `/api`，纯静态站点，不需要在前端跑服务
 - 路由：hash 模式（`#/`），刷新和直接分享链接都能落到对应页面
-- 身份：CloudBase **匿名登录**（uid → 云函数里的 `rn_<uid>`，与微信 openid 完全隔离，不会串号）
+- 响应式：手机 480 → 平板 720 → 桌面 960/1120 三档，桌面端底部 Tab 变顶部导航、列表双列
+- 身份：用户名 + 密码登录，令牌存 localStorage；未登录可浏览只读内容
 
 ## 页面对照
 
@@ -30,7 +31,7 @@
 ```bash
 cd h5
 npm install
-cp .env.example .env    # 填写 VITE_CLOUDBASE_ENV
+cp .env.example .env    # 默认 /api，跨域部署时改 VITE_API_BASE
 npm run dev             # http://127.0.0.1:5173
 ```
 
@@ -38,8 +39,10 @@ npm run dev             # http://127.0.0.1:5173
 
 | 变量 | 必填 | 说明 |
 | --- | --- | --- |
-| `VITE_CLOUDBASE_ENV` | 是 | 云开发环境 ID，例如 `cloud1-xxxx` |
-| `VITE_CLOUDBASE_CLIENT_ID` | 否 | Publishable Key（控制台 / API Key 生成），匿名登录报 credentials 错时填写 |
+| `VITE_API_BASE` | 否 | 后端地址，默认 `/api`（同源部署）。前后端分离时填 `https://api.example.com/api` |
+
+本地开发时 Vite 已把 `/api`、`/uploads` 代理到 `http://127.0.0.1:3000`，
+可用 `VITE_DEV_API_TARGET` 改指向其他后端地址。
 
 变量会被打包进前端代码，**不要放任何私密密钥**。
 
@@ -86,22 +89,20 @@ cd h5 && npm ci && npm run build && tcb hosting deploy ./dist snack-h5 -e cloud1
 
 访问地址：`https://<静态托管默认域名>/snack-h5/#/`（hash 路由，子目录部署无需额外改写规则）。
 
-## 部署后必做的三项配置
+## 部署后必做的配置
 
-1. **WEB 安全域名**：CloudBase 控制台 → 环境 → 安全配置 → WEB 安全域名，
-   加入站点域名（本地调试可加 `http://127.0.0.1:5173`）。未加会报「没有访问权限」。
-2. **匿名登录**：控制台 → 环境 → 登录授权 → 身份源，开启「匿名登录」。
-   未开启时页面会提示，可改用账号登录。
-3. **云函数版本**：部署 `miniprogram/cloudfunctions/snackShop`，
-   确认是支持 `cloudbase` 身份（含 `cloudbaseUid`）的版本，否则网页端会被当成未登录。
+1. **后端 CORS**：把站点域名加入服务端 `.env` 的 `CORS_ORIGIN`，
+   否则浏览器会被跨域拦截（本地调试可加 `http://127.0.0.1:5173`）。
+2. **创建站长账号**：在服务端执行 `npm run init-admin -- admin <密码>`。
+3. **Nginx 反代**：把 `/api` 指向 Node 服务即可，图片走 COS 无需反代（见 `server/README.md`）。
 
-> 店主身份只在微信小程序链路下判定，网页端一律按普通邻居处理，
+> 网页端一律按普通邻居处理，不使用店主身份，
 > 因此订单页不显示「店主工作台」。管理端请用 `web/` 的商家后台。
 
 ## 与小程序的行为差异
 
-- 商品图由云函数直接返回临时链接；广场、闲置、头像的 `cloud://` 图片由前端
-  `getTempFileURL` 换取临时链接后展示。
+- 图片统一是 COS 直链（`https://<bucket>.cos.<region>.myqcloud.com/<目录>/<文件>`），
+  无需再换临时链接；历史数据里残留的 `cloud://` 无法解析，会回退到占位图。
 - 期望送达时间用两个下拉框（日期 + 时间）替代小程序的 `picker`。
 -「读取剪贴板」按钮在网页上保留为手动粘贴（浏览器剪贴板权限受限）。
 - 分享给邻居改为浏览器自身的分享/复制链接。

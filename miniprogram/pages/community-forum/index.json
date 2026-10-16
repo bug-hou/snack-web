@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "邻里广场",
-  "navigationBarBackgroundColor": "#F8F6F1",
-  "backgroundColor": "#F8F6F1",
-  "enablePullDownRefresh": true,
-  "onReachBottomDistance": 120
-}

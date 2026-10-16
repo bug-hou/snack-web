@@ -24,7 +24,7 @@ export default function Users() {
   async function open(user) {
     setDetail({ user, orders: [], addresses: [], loading: true });
     try {
-      const data = await invoke('getUserDetail', { openid: user.openid });
+      const data = await invoke('getUserDetail', { userId: user.userId });
       setDetail({ user, ...data, loading: false });
     } catch (e) {
       toast(e.message, 'error');
@@ -64,7 +64,7 @@ export default function Users() {
                 </thead>
                 <tbody>
                   {users.list.map(u => (
-                    <tr key={u.openid}>
+                    <tr key={u.userId}>
                       <td>
                         <div className="cell-main">
                           <strong>{u.recipient || '未填写姓名'}</strong>
@@ -101,7 +101,7 @@ export default function Users() {
             <div className="stat"><span>收货地址</span><strong>{detail.user.addressCount || 0}</strong><small>最多 10 个</small></div>
           </div>
 
-          <div className="small muted">用户标识：<span className="user-id">{detail.user.openid}</span></div>
+          <div className="small muted">用户标识：<span className="user-id">{detail.user.userId}</span></div>
 
           {detail.loading ? <LoadingRow text="正在加载详情…" /> : (
             <>

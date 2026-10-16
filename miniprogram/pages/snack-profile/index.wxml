@@ -1,17 +1,53 @@
 <view class="snack-page profile-page">
-  <view class="page-lead"><view class="small-kicker">MY NEIGHBOURHOOD / 我的社区</view><view class="page-title">住得近一点，<view>生活轻松一点<text class="title-period">.</text></view></view><view class="page-sub">常用地址、需求登记与社区服务</view></view>
-  <view class="profile-hero">
-    <view class="profile-avatar"><image wx:if="{{avatarUrl}}" class="avatar-image" src="{{avatarUrl}}" mode="aspectFill"/><text wx:else>{{initial}}</text></view>
-    <view class="profile-hero-copy"><view class="profile-hero-title">{{displayName}}</view><view class="profile-hero-sub">取快递 · 买日常 · 分享好物</view></view>
-    <view class="profile-edit" bindtap="goProfileEdit">编辑　›</view>
+  <view class="page-lead">
+    <view class="small-kicker">MY NEIGHBOURHOOD / 我的社区</view>
+    <view class="page-title">住得近一点，<view>生活轻松一点<text class="title-period">.</text></view></view>
+    <view class="page-sub">商品信息与配送说明</view>
   </view>
-  <view class="profile-section"><view class="profile-section-heading">个人资料</view><view class="profile-row" bindtap="goProfileEdit"><view><view class="profile-row-title">头像与昵称</view><view class="profile-row-sub">{{profileSummary}}</view></view><text>{{hasProfile ? '修改　›' : '去完善　›'}}</text></view></view>
-  <view class="profile-section"><view class="profile-section-heading">社区服务</view><view class="profile-row" bindtap="goForum"><view><view class="profile-row-title">邻里广场</view><view class="profile-row-sub">闲聊 · 互助求助 · 失物招领 · 社区公告</view></view><text>进入　›</text></view><view class="profile-row" data-id="express" bindtap="goService"><view><view class="profile-row-title">快递代取</view><view class="profile-row-sub">筹备中 · 查看代取流程与须知</view></view><text>查看　›</text></view><view class="profile-row" data-id="purchase" bindtap="goService"><view><view class="profile-row-title">京东便利店代买</view><view class="profile-row-sub">筹备中 · 非官方社区代买</view></view><text>查看　›</text></view><view class="profile-row" data-id="secondhand" bindtap="goService"><view><view class="profile-row-title">二手物品分享</view><view class="profile-row-sub">筹备中 · 二手转让与免费分享</view></view><text>查看　›</text></view></view>
-  <view class="profile-section"><view class="profile-section-heading">配送服务</view><view class="profile-row"><view><view class="profile-row-title">保利爱尚里上门配送</view><view class="profile-row-sub">仅限小区 16、17、18 栋</view></view><text>送到门口</text></view><view class="profile-row"><view><view class="profile-row-title">送达方式自选</view><view class="profile-row-sub">登记时选择敲门或到达后电话联系</view></view><text>按需选择</text></view><view class="profile-row"><view><view class="profile-row-title">营业与配送</view><view class="profile-row-sub">{{hours}}</view></view><text>{{isOpen ? '接单中' : '休息中'}}</text></view><view class="profile-row"><view><view class="profile-row-title">配送规则</view><view class="profile-row-sub">商品满 ¥{{minOrder}} 起送 · 配送费 ¥{{deliveryFee}}</view></view><text>线下结算</text></view></view>
-  <view class="profile-section"><view class="profile-row" bindtap="goAddress"><view><view class="profile-row-title">我的收货地址</view><view class="profile-row-sub">管理常用楼栋、门牌号和联系电话</view></view><text>查看　›</text></view></view>
-  <view wx:if="{{isOwner}}" class="profile-section"><view class="profile-row" bindtap="goOrders"><view class="profile-row-title">需求管理</view><text>前往　→</text></view></view>
-  <view wx:if="{{ownerId}}" class="profile-section"><view class="profile-row" bindtap="toggleOwnerId"><view><view class="profile-row-title">店主身份绑定</view><view class="profile-row-sub">需要在网页商家端绑定小程序时使用</view></view><text>{{showOwnerId ? '收起' : '查看'}}</text></view><view wx:if="{{showOwnerId}}" class="owner-id"><text selectable="{{true}}">{{ownerId}}</text><view bindtap="copyOwnerId">复制我的标识</view></view></view>
-  <view class="compliance-note"><view class="compliance-title">温馨提示</view><view>本小程序仅提供社区便民信息展示与需求登记，不提供在线下单、在线支付与交易担保。需求登记后可在“我的需求”中查看处理进度，实际商品、费用与送达以店家线下与您确认为准。</view></view>
-  <view class="profile-link" bindtap="goShop">逛便利铺商品　→</view>
+
+  <view class="profile-hero">
+    <view class="profile-avatar"><text>里</text></view>
+    <view class="profile-hero-copy">
+      <view class="profile-hero-title">爱尚里生活</view>
+      <view class="profile-hero-sub">家门口的小事，一起办好</view>
+    </view>
+  </view>
+
+  <!-- 完整功能引导到网站 -->
+  <view class="profile-section">
+    <view class="compliance-banner">
+      本小程序仅提供信息展示。下单、需求登记、邻里广场、闲置分享、跑腿代取等功能，请在浏览器中访问网站使用。
+    </view>
+    <view aria-role="button" class="publish-button" bindtap="copyWebsite" aria-label="复制网站地址">
+      <image src="/images/community/package-open.svg"/>
+      <text>复制网站地址 · {{website}}</text>
+    </view>
+  </view>
+
+  <view class="profile-section">
+    <view class="profile-section-heading">配送服务</view>
+    <view class="profile-row">
+      <view><view class="profile-row-title">保利爱尚里上门配送</view><view class="profile-row-sub">仅限小区 16、17、18 栋</view></view>
+      <text>送到门口</text>
+    </view>
+    <view class="profile-row">
+      <view><view class="profile-row-title">送达方式自选</view><view class="profile-row-sub">登记时选择敲门或到达后电话联系</view></view>
+      <text>按需选择</text>
+    </view>
+    <view class="profile-row">
+      <view><view class="profile-row-title">营业与配送</view><view class="profile-row-sub">{{hours}}</view></view>
+      <text>{{isOpen ? '接单中' : '休息中'}}</text>
+    </view>
+    <view class="profile-row">
+      <view><view class="profile-row-title">配送规则</view><view class="profile-row-sub">商品满 ¥{{minOrder}} 起送 · 配送费 ¥{{deliveryFee}}</view></view>
+      <text>线下结算</text>
+    </view>
+  </view>
+
+  <view class="compliance-note">
+    <view class="compliance-title">温馨提示</view>
+    <view>本小程序仅提供社区便民信息展示，不提供在线下单、在线支付与交易担保。实际商品、费用与送达以店家线下与您确认为准。</view>
+  </view>
+
   <view class="profile-footer">保利爱尚里 · 爱尚里生活</view>
 </view>

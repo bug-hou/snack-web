@@ -1,4 +1,4 @@
-import { invoke } from './cloudbase';
+import { invoke } from './client';
 
 /** 与云函数 viewProduct 对齐 */
 export type Product = {

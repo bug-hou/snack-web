@@ -92,13 +92,13 @@ function Login({ session, uid, error, onLogout }) {
         <div className="login-box">
           <span className="eyebrow">POCKET SNACKS · ADMIN</span>
           <h2>{session ? '尚未开通店主权限' : '欢迎回来'}</h2>
-          <p>{session ? '当前账号已登录，但还不是这家小店的店主。请把下面的 UID 配置到云函数环境变量。' : '登录后可管理订单、商品与营业设置。'}</p>
+          <p>{session ? '当前账号已登录，但不是管理员。请使用站长账号登录（服务端 .env 里 ADMIN_USERNAMES 中的用户名）。' : '登录后可管理订单、商品与营业设置。'}</p>
 
           {session ? (
             <>
               <div className="uid-box">
-                当前账号 UID（复制到云函数 snackAdmin 的环境变量 SHOP_ADMIN_UID）
-                <code>{uid || '请到 CloudBase 控制台查看'}</code>
+                当前账号标识（需为 admin 角色才能进入后台）
+                <code>{uid || '未登录'}</code>
               </div>
               <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
                 <button className="btn btn-primary btn-block" onClick={onLogout}>退出当前账号</button>
@@ -108,7 +108,7 @@ function Login({ session, uid, error, onLogout }) {
             <form className="login-form" onSubmit={submit}>
               <div className="field">
                 <label>商家账号</label>
-                <input className="input" autoComplete="username" value={username} placeholder="CloudBase 用户名"
+                <input className="input" autoComplete="username" value={username} placeholder="商家账号"
                   onChange={e => setUsername(e.target.value)} required />
               </div>
               <div className="field">

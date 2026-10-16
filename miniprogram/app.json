@@ -1,22 +1,13 @@
 {
   "pages": [
     "pages/snack-home/index",
-    "pages/community-forum/index",
-    "pages/community-forum-post/index",
-    "pages/community-forum-detail/index",
-    "pages/snack-cart/index",
-    "pages/snack-checkout/index",
-    "pages/snack-address/index",
-    "pages/snack-orders/index",
     "pages/snack-profile/index",
     "pages/snack-profile-edit/index",
-    "pages/community-service/index",
-    "pages/community-errand/index",
-    "pages/community-share/index",
-    "pages/community-share-form/index",
-    "pages/community-share-detail/index"
+    "pages/snack-cart/index",
+    "pages/snack-checkout/index",
+    "pages/snack-orders/index",
+    "pages/snack-address/index"
   ],
-  "cloud": true,
   "window": {
     "backgroundColor": "#F8F6F1",
     "backgroundTextStyle": "dark",
@@ -32,15 +23,9 @@
     "list": [
       {
         "pagePath": "pages/snack-home/index",
-        "text": "社区",
+        "text": "商品",
         "iconPath": "images/tabbar/community.png",
         "selectedIconPath": "images/tabbar/community_on.png"
-      },
-      {
-        "pagePath": "pages/community-forum/index",
-        "text": "广场",
-        "iconPath": "images/tabbar/forum.png",
-        "selectedIconPath": "images/tabbar/forum_on.png"
       },
       {
         "pagePath": "pages/snack-profile/index",

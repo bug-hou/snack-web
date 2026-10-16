@@ -1,0 +1,27 @@
+{
+  "name": "aishangli-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "爱尚里社区后端服务（替代微信云开发，部署在 Lighthouse）",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "init-admin": "node scripts/init-admin.js",
+    "migrate": "node scripts/migrate-from-cloudbase.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "cos-nodejs-sdk-v5": "^3.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.8.0",
+    "multer": "^2.0.0"
+  }
+}

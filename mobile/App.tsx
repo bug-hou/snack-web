@@ -13,8 +13,8 @@ import {
 import { StatusBar } from 'expo-status-bar';
 
 import { getCatalog, type Product } from './src/api';
-import { cloudbaseConfig, missingConfig } from './src/config';
-import { normalizeError } from './src/cloudbase';
+import { apiConfig, missingConfig } from './src/config';
+import { normalizeError } from './src/client';
 import { useSession } from './src/session';
 import { theme, toneColor } from './src/theme';
 
@@ -24,8 +24,7 @@ type CheckState = {
 };
 
 export default function App() {
-  const { session, pending, error: authError, signInAnonymously, signInWithPassword, signOut } =
-    useSession();
+  const { session, pending, error: authError, signIn, signUp, signOut } = useSession();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -60,24 +59,16 @@ export default function App() {
   const header = (
     <View style={styles.header}>
       <Text style={styles.title}>邻里点单 · 移动端自检</Text>
-      <Text style={styles.subtitle}>Expo + React Native → CloudBase → 云函数 → 云数据库</Text>
+      <Text style={styles.subtitle}>Expo + React Native → 自建后端 → MongoDB</Text>
 
       <Card title="环境">
-        <Row label="env" value={cloudbaseConfig.env || '（未配置）'} />
-        <Row label="region" value={cloudbaseConfig.region || '（未配置）'} />
-        <Row label="Publishable Key" value={cloudbaseConfig.accessKey ? '已配置' : '（未配置）'} />
+        <Row label="API" value={apiConfig.baseUrl || '（未配置）'} />
         {!ready && <Text style={styles.hint}>{`复制 .env.example 为 .env 并填写后重启 expo start`}</Text>}
       </Card>
 
       <Card title="登录">
         <Row label="当前身份" value={session.uid ? session.uid : '未登录（游客）'} />
         <Row label="来源" value={session.source} />
-        <View style={styles.buttonRow}>
-          <Button label={pending ? '处理中...' : '匿名登录'} onPress={signInAnonymously} disabled={pending || !ready} />
-          {session.uid ? (
-            <Button label="退出" onPress={signOut} disabled={pending} tone="ghost" />
-          ) : null}
-        </View>
         <TextInput
           style={styles.input}
           placeholder="用户名"
@@ -94,12 +85,22 @@ export default function App() {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <Button
-          label="账号密码登录"
-          onPress={() => signInWithPassword(username, password)}
-          disabled={pending || !ready || !username || !password}
-          tone="ghost"
-        />
+        <View style={styles.buttonRow}>
+          <Button
+            label="登录"
+            onPress={() => signIn(username, password)}
+            disabled={pending || !ready || !username || !password}
+          />
+          <Button
+            label="注册"
+            onPress={() => signUp(username, password)}
+            disabled={pending || !ready || !username || !password}
+            tone="ghost"
+          />
+        </View>
+        {session.uid ? (
+          <Button label="退出" onPress={signOut} disabled={pending} tone="ghost" />
+        ) : null}
         {authError ? <Text style={styles.error}>{authError}</Text> : null}
       </Card>
 

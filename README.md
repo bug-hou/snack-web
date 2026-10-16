@@ -30,11 +30,6 @@ ordering/
 │   ├── cos.js                        # COS 图片上传
 │   └── .env                          # COS 密钥配置
 │
-├── agent/                            # LangGraph TS + CloudBase Agent
-│   ├── src/                          # Agent 工作流与 HTTP 入口
-│   ├── .env.example                  # Agent 环境变量示例
-│   └── README.md                     # Agent 本地开发/部署说明
-│
 └── project.config.json               # 小程序项目配置
 ```
 
@@ -68,40 +63,7 @@ wx.cloud.init({
 - 右键 `cloudfunctions/initDB` → 上传并部署
 - 在云函数列表中点击 `initDB` → 测试 → 执行（初始化种子数据）
 
-### 4. 配置 AI 识菜
-
-当前 `wx-server-sdk` 不一定内置 AI 入口；`api` 云函数支持两种方式：
-
-1. 已开通 CloudBase AI：配置 `CLOUDBASE_AI_MODEL`（可选，默认 `deepseek-v4-pro`）。
-2. 使用 OpenAI 兼容视觉模型：在 `api` 云函数环境变量配置：
-   - `AI_API_KEY`
-   - `AI_API_BASE_URL`，例如 `https://api.example.com/v1`
-   - `AI_MODEL`，必须是支持图片理解的模型
-
-配置后重新上传并部署 `cloudfunctions/api`。
-
-### 5. 本地开发家庭厨房 Agent
-
-项目已内置独立的 `agent/` 目录，使用 `LangGraph TS + CloudBase Agent`：
-
-```bash
-cd agent
-npm install
-cp .env.example .env
-npm run dev
-```
-
-部署为 CloudBase HTTP 云函数：
-
-```bash
-cd agent
-npm run build
-tcb fn deploy family-kitchen-agent --httpFn -e cloud1-d9gvn0kkg13217e4e
-```
-
-小程序端可通过 `miniprogram/utils/agent.js` 调用，要求微信基础库 `3.15.1+`。
-
-### 6. 启动后台管理
+### 4. 启动后台管理
 
 ```bash
 cd server

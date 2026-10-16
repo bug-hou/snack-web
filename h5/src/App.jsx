@@ -3,7 +3,7 @@ import UiHost from './components/UiHost';
 import { TabBar } from './components/Layout';
 import { Banner } from './components/Bits';
 import { useRoute, parsePath, redirect } from './lib/router';
-import { CONFIG_ERROR, currentUid, ensureLogin, errorText, signInWithPassword } from './lib/cloud';
+import { CONFIG_ERROR, currentUid, errorText, register, signInWithPassword } from './lib/cloud';
 import Home from './pages/Home';
 import Forum from './pages/Forum';
 import ForumPost from './pages/ForumPost';
@@ -34,17 +34,27 @@ function ConfigScreen() {
   );
 }
 
-function LoginScreen({ error, onAnonymous, onPassword, onBrowse }) {
+function LoginScreen({ error, onLogin, onRegister, onBrowse }) {
+  const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [nickName, setNickName] = useState('');
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState('');
 
-  async function submitPassword() {
+  const isRegister = mode === 'register';
+
+  function switchMode(next) {
+    setMode(next);
+    setFail('');
+  }
+
+  async function submit() {
     if (busy || !username.trim() || !password) return;
     setBusy(true); setFail('');
     try {
-      await onPassword(username.trim(), password);
+      if (isRegister) await onRegister(username.trim(), password, nickName.trim());
+      else await onLogin(username.trim(), password);
     } catch (e) {
       setFail(errorText(e));
     } finally { setBusy(false); }
@@ -61,17 +71,11 @@ function LoginScreen({ error, onAnonymous, onPassword, onBrowse }) {
       </div>
 
       <div className="card">
-        <div className="card-title">开始使用</div>
+        <div className="card-title">{isRegister ? '注册新账号' : '登录'}</div>
         <p className="login-copy">
-          网页版使用云开发匿名登录，不会读取微信身份，也不会要求手机号。
-          换个浏览器会被当成新邻居，登录后可在「我的」里设置昵称。
+          用用户名和密码登录，不读取微信身份，也不需要手机号。
+          {isRegister ? '用户名 3-20 位字母、数字或下划线，密码至少 8 位。' : '换设备后用同一账号登录即可继续。'}
         </p>
-        <button type="button" className="primary-action" onClick={onAnonymous}>一键进入　→</button>
-        <button type="button" className="ghost-action" onClick={onBrowse}>先随便逛逛</button>
-      </div>
-
-      <div className="card">
-        <div className="card-title">用账号登录</div>
         <input
           className="input"
           value={username}
@@ -85,16 +89,29 @@ function LoginScreen({ error, onAnonymous, onPassword, onBrowse }) {
           value={password}
           onChange={event => setPassword(event.target.value)}
           placeholder="密码"
-          autoComplete="current-password"
+          autoComplete={isRegister ? 'new-password' : 'current-password'}
         />
+        {isRegister ? (
+          <input
+            className="input"
+            value={nickName}
+            onChange={event => setNickName(event.target.value)}
+            placeholder="昵称（选填，至少 2 个字）"
+            autoComplete="nickname"
+          />
+        ) : null}
         {fail ? <div className="error-line">{fail}</div> : null}
-        <button type="button" className="primary-action" onClick={submitPassword} disabled={busy}>
-          {busy ? '登录中…' : '登录'}
+        <button type="button" className="primary-action" onClick={submit} disabled={busy}>
+          {busy ? (isRegister ? '注册中…' : '登录中…') : (isRegister ? '注册并进入' : '登录')}
         </button>
+        <button type="button" className="ghost-action" onClick={() => switchMode(isRegister ? 'login' : 'register')}>
+          {isRegister ? '已有账号，去登录' : '还没有账号，去注册'}
+        </button>
+        <button type="button" className="ghost-action" onClick={onBrowse}>先随便逛逛</button>
       </div>
 
       {error ? <Banner tone="peach">{error}</Banner> : null}
-      <div className="foot-note">若「一键进入」失败，请到云开发控制台开启「匿名登录」，或改用账号登录。</div>
+      <div className="foot-note">登录后可登记需求、发布闲置和参与邻里广场；未登录只能浏览。</div>
     </div>
   );
 }
@@ -153,29 +170,22 @@ export default function App() {
     let alive = true;
     (async () => {
       const uid = await currentUid();
-      if (uid) {
-        if (alive) setSession({ status: 'ready', uid });
-        return;
-      }
-      const ok = await ensureLogin();
-      if (!alive) return;
-      if (ok) setSession({ status: 'ready', uid: await currentUid() });
-      else setSession({ status: 'guest', uid: '' });
+      if (alive) setSession(uid ? { status: 'ready', uid } : { status: 'guest', uid: '' });
     })();
     return () => { alive = false; };
-  }, []);
-
-  const retryAnonymous = useCallback(async () => {
-    setLoginError('');
-    const ok = await ensureLogin();
-    if (ok) setSession({ status: 'ready', uid: await currentUid() });
-    else setLoginError('匿名登录未开启，请在云开发控制台 → 环境 → 登录授权中开启「匿名登录」，或改用账号登录。');
   }, []);
 
   const loginWithPassword = useCallback(async (username, password) => {
     const uid = await signInWithPassword(username, password);
     setSession({ status: 'ready', uid });
   }, []);
+
+  const registerAccount = useCallback(async (username, password, nickName) => {
+    const uid = await register(username, password, nickName);
+    setSession({ status: 'ready', uid });
+  }, []);
+
+  const backToLogin = useCallback(() => setSession({ status: 'guest', uid: '' }), []);
 
   if (CONFIG_ERROR) {
     return (
@@ -203,8 +213,8 @@ export default function App() {
       <div className="app">
         <LoginScreen
           error={loginError}
-          onAnonymous={retryAnonymous}
-          onPassword={loginWithPassword}
+          onLogin={loginWithPassword}
+          onRegister={registerAccount}
           onBrowse={() => setSession({ status: 'browse', uid: '' })}
         />
         <UiHost />
@@ -221,7 +231,7 @@ export default function App() {
       {session.status === 'browse' ? (
         <div className="guest-bar">
           <span>浏览模式：登记需求、发布内容需要先登录</span>
-          <button type="button" onClick={retryAnonymous}>登录</button>
+          <button type="button" onClick={backToLogin}>登录</button>
         </div>
       ) : null}
       {element}
