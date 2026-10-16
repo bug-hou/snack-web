@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Banner, Card } from '../components/Bits';
 import { navigate, redirect } from '../lib/router';
 import { getSummary, clear } from '../lib/cart';
@@ -162,12 +162,7 @@ export default function Checkout({ productId = '' }) {
 
   return (
     <div className="screen screen-padded checkout-page">
-      <NavBar title="确认需求" />
-      <div className="page-lead">
-        <div className="small-kicker">保利爱尚里 · 送货上门</div>
-        <div className="page-title">确认需求<span className="title-period">.</span></div>
-        <div className="page-sub">需求登记 · 送达后线下当面结算</div>
-      </div>
+      <PageHeader title="确认需求" sub="送达后线下当面结算" />
 
       <Banner>这一步只是把您的需求登记给店家，不会产生在线订单，也不需要在线支付。商品、数量与送达时间以店家线下与您确认为准。</Banner>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Banner, Spinner, EmptyState } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { useCart, change, clear } from '../lib/cart';
@@ -60,12 +60,7 @@ export default function Cart() {
 
   return (
     <div className="screen screen-padded cart-page">
-      <NavBar title="需求清单" />
-      <div className="page-lead">
-        <div className="small-kicker">MY LIST / 需求清单</div>
-        <div className="page-title">日常所需都在这<span className="title-period">.</span></div>
-        <div className="page-sub">挑好想买的，登记后由店家与您线下确认，线下当面结算</div>
-      </div>
+      <PageHeader title="需求清单" sub="挑好想买的，登记后由店家与您线下确认" />
 
       <Banner>清单只记录您想要的商品与数量，不构成订单。提交后会生成一条需求登记，由店家线下与您联系确认。</Banner>
 

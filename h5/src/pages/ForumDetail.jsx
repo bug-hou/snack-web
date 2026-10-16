@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Message } from '../components/Bits';
 import { back } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -119,7 +119,7 @@ export default function ForumDetail({ id }) {
 
   return (
     <div className="screen screen-padded detail-page detail-with-bar">
-      <NavBar title="帖子详情" fallback="/forum" />
+      <PageHeader title="帖子详情" />
 
       {loading ? <Message>正在加载帖子…</Message> : null}
       {!loading && error ? <Message>{error}</Message> : null}

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import Icon from '../components/Icon';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Message } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -48,11 +47,11 @@ export default function Shares() {
 
   return (
     <div className="screen screen-padded share-page">
-      <NavBar title="邻里闲置" fallback="/" />
-      <div className="share-head">
-        <div className="share-title">邻里闲置</div>
-        <div className="share-sub">二手转让，也可以免费送给邻居</div>
-      </div>
+      <PageHeader
+        title="邻里闲置"
+        sub="二手转让，也可以免费送给邻居"
+        right={<button type="button" className="page-head-link" onClick={() => navigate('/shares/new')}>发布</button>}
+      />
 
       <div className="scope-tabs">
         {TABS.map(tab => (
@@ -102,11 +101,6 @@ export default function Shares() {
           </article>
         );
       }) : null}
-
-      <button type="button" className="publish-button dock" onClick={() => navigate('/shares/new')}>
-        <Icon name="plus" size={15} />
-        <span>发布闲置　→</span>
-      </button>
     </div>
   );
 }

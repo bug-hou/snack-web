@@ -21,10 +21,22 @@
 | `#/orders` | snack-orders | 我的需求（进度自动刷新） |
 | `#/address` | snack-address | 收货地址管理 |
 | `#/shares`、`#/shares/new`、`#/shares/:id` | community-share* | 邻里闲置 |
-| `#/service/:type` | community-service | 服务流程与须知 |
 | `#/errand/express`、`#/errand/purchase` | community-errand | 快递代取 / 便利店代买登记 |
+| `#/service/:type` | — | 旧链接，自动跳到对应服务登记页 / 邻里闲置 |
 
-底部 Tab（社区 / 广场 / 我的）与小程序 tabBar 一致。
+底部 Tab（社区 / 广场 / 我的）与小程序 tabBar 一致，所有页面常驻。
+
+## 安装到手机桌面（PWA）
+
+站点已支持「添加到主屏幕」：安装后从桌面图标打开是全屏独立窗口，不显示浏览器地址栏。
+
+- `public/manifest.webmanifest`：名称、图标、启动地址 `#/`、`display: standalone`、三个快捷方式
+- `public/sw.js`：Service Worker，页面走网络优先并缓存外壳（断网可打开），静态资源缓存优先，
+  `/api` 与 `/uploads` 只走网络不缓存（订单、地址、登录态必须实时）
+- 图标：`public/icons/`（192 / 512 / maskable 512 / apple-touch 180），品牌绿底白字「里」
+- 入口：「我的 → 添加到手机桌面」。Android / Chrome 走原生安装弹窗；iOS 用 Safari
+  「分享 → 添加到主屏幕」，页面会给出对应指引
+- 前提：线上需 HTTPS（或 localhost）；`edgeone.json` 已为 `sw.js` 设置不缓存、为 manifest 设置正确 MIME
 
 ## 本地开发
 

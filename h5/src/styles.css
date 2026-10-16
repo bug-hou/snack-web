@@ -20,6 +20,22 @@
   --radius: 0.81rem;
   /* 内容栏宽度：手机 480 → 平板 720 → 小桌面 960 → 宽屏 1120 */
   --app-w: 480px;
+
+  /* 间距刻度：页面里只允许使用这一组值，不再手写零散像素 */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  /* 区块之间、卡片内部、列表行的统一节奏 */
+  --gap-block: var(--sp-6);
+  --gap-card: var(--sp-4);
+  --row-h: 3.25rem;
+  --r-sm: 0.5rem;
+  --r-md: 0.75rem;
+  --r-lg: 1rem;
 }
 
 html {
@@ -28,6 +44,11 @@ html {
 }
 
 * { box-sizing: border-box; }
+
+/* 移动端点击默认会出现系统蓝色高亮块，统一关掉，改用自身的 :active 反馈 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
@@ -42,6 +63,17 @@ button { font: inherit; color: inherit; }
 img { display: block; max-width: 100%; }
 input, textarea, select { font: inherit; color: inherit; }
 
+/* iOS Safari 会给 button / input 加默认圆角、内阴影和蓝色焦点框 */
+button, input, textarea, select {
+  -webkit-appearance: none;
+  appearance: none;
+}
+button { cursor: pointer; }
+
+/* 触摸/鼠标点击不显示系统轮廓，键盘 Tab 仍保留焦点环 */
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
 .app {
   position: relative;
   width: min(100%, var(--app-w));
@@ -52,7 +84,10 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 
 .screen { min-height: 100vh; }
-.screen-padded { padding: 0 1rem 2.5rem; }
+/* 底部导航常驻所有页面，非 Tab 页也要留出它的高度 */
+.screen-padded {
+  padding: 0 1rem calc(var(--dock-h) + env(safe-area-inset-bottom) + var(--sp-6));
+}
 .screen-tabbed {
   padding-top: calc(env(safe-area-inset-top) + 0.25rem);
   padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 1rem);
@@ -72,41 +107,48 @@ input, textarea, select { font: inherit; color: inherit; }
 
 .icon { display: block; flex-shrink: 0; }
 
+button, .chip, .tabbar-item {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
 /* ---------------- 顶部导航 / TabBar ---------------- */
 
-.navbar {
+/* 大标题页头：无返回箭头，返回交给系统手势 / 浏览器返回 / 常驻底部导航 */
+.page-head {
   position: sticky;
   top: 0;
   z-index: 30;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  height: calc(2.75rem + env(safe-area-inset-top));
-  padding: env(safe-area-inset-top) 0 0;
+  gap: var(--sp-4);
+  padding: calc(env(safe-area-inset-top) + var(--sp-3)) 0 var(--sp-2);
   background: var(--bg);
 }
-.navbar-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.75rem;
+.page-head-copy { min-width: 0; }
+.page-head-title {
+  margin: 0;
+  font-size: 1.63rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.page-head-sub {
+  margin: var(--sp-1) 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.page-head-right { flex: none; display: flex; align-items: center; gap: var(--sp-2); }
+.page-head-link {
   border: 0;
   background: none;
+  padding: 0;
+  color: var(--green);
+  font-size: 0.81rem;
+  font-weight: 600;
   cursor: pointer;
-  color: var(--ink);
 }
-.navbar-title {
-  flex: 1;
-  margin: 0;
-  text-align: center;
-  font-size: 1.06rem;
-  font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.navbar-right { min-width: 2.5rem; display: flex; justify-content: flex-end; padding-right: 0.75rem; }
 
 .tabbar {
   display: flex;
@@ -397,7 +439,7 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex;
   gap: 0.38rem;
   overflow-x: auto;
-  padding: 0.13rem 0 0.5rem;
+  padding: 0.13rem 0 0.63rem;
   scrollbar-width: none;
 }
 .chip-scroll::-webkit-scrollbar { display: none; }
@@ -587,7 +629,7 @@ input, textarea, select { font: inherit; color: inherit; }
   display: flex;
   align-items: center;
   padding: 0.94rem;
-  margin: 0.63rem 0 0.25rem;
+  margin: 0.63rem 0 0.63rem;
   border-radius: 0.81rem;
   background: var(--warm);
 }
@@ -666,13 +708,13 @@ input, textarea, select { font: inherit; color: inherit; }
 }
 .service-arrow { color: #9AA49A; font-size: 1.06rem; margin-left: 0.44rem; }
 
-.section-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 1.25rem 0 0.56rem; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; margin: 1.5rem 0 0.63rem; }
 .section-eyebrow { font-size: 0.47rem; letter-spacing: 0.06rem; font-weight: 700; color: var(--green); }
 .section-name { font-size: 0.91rem; font-weight: 800; margin-top: 0.22rem; }
 .section-link { border: 0; background: none; font-size: 0.63rem; color: var(--green); padding: 0.5rem 0; cursor: pointer; }
-.catalog-head { margin-top: 1.38rem; }
+.catalog-head { margin-top: 1.5rem; }
 .shop-state { font-size: 0.63rem; color: var(--green); padding: 0.22rem 0.44rem; background: var(--green-tint); border-radius: 999px; }
-.catalog-caption { font-size: 0.59rem; color: #69746B; margin: -0.13rem 0 0.63rem; }
+.catalog-caption { font-size: 0.59rem; color: #69746B; margin: 0.25rem 0 0.63rem; }
 
 .share-row { display: flex; gap: 0.38rem; }
 .share-card {
@@ -794,6 +836,7 @@ input, textarea, select { font: inherit; color: inherit; }
 .search-box {
   display: flex;
   align-items: center;
+  margin-bottom: 0.63rem;
   min-height: 2.56rem;
   background: #fff;
   border: 1px solid #E4E7DE;
@@ -2007,25 +2050,17 @@ input, textarea, select { font: inherit; color: inherit; }
   .tabbar-item.active { background: var(--green-soft); }
   .tabbar-item:hover { background: #E2E7DC; }
 
-  /* 二级页头：吸在顶部导航下方，做成一条工具栏 */
-  .navbar {
+  /* 大标题页头：吸在顶部主导航下方 */
+  .page-head,
+  .home-top {
     top: var(--nav-h);
-    height: 3.25rem;
-    padding-top: 0;
     background: rgba(241, 239, 232, 0.92);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
   }
-  .navbar-back {
-    width: 2.25rem;
-    height: 2.25rem;
-    margin-left: 0.25rem;
-    border: 1px solid var(--green-line);
-    border-radius: 0.69rem;
-    background: #fff;
-  }
-  .navbar-title { font-size: 0.88rem; font-weight: 700; color: #4C5B50; }
+  .page-head { padding-top: var(--sp-3); padding-bottom: var(--sp-3); }
+  .home-top { padding-top: var(--sp-3); }
 
   /* 底部悬浮条：没有 TabBar 了，直接贴底并做成胶囊 */
   .dock-raised, .dock-tabbed { bottom: 1rem; }
@@ -2255,7 +2290,8 @@ input, textarea, select { font: inherit; color: inherit; }
     align-content: start;
     align-items: start;
   }
-  .forum-page .navbar, .share-page .navbar, .orders-page .navbar, .profile-page .navbar,
+  .home-page .home-top,
+  .forum-page .page-head, .share-page .page-head, .orders-page .page-head, .profile-page .page-head,
   .forum-page .forum-head,
   .forum-page .chip-scroll,
   .forum-page .forum-notice,
@@ -2296,7 +2332,7 @@ input, textarea, select { font: inherit; color: inherit; }
     align-content: start;
     align-items: start;
   }
-  .cart-page .navbar,
+  .cart-page .page-head,
   .cart-page .page-lead,
   .cart-page .banner,
   .cart-page .spinner-wrap,
@@ -2310,7 +2346,8 @@ input, textarea, select { font: inherit; color: inherit; }
   .cart-page .notice-card { grid-column: 2; }
 
   /* 网格页里 sticky 会被限制在自己的网格区域内，改为静态页头（顶部主导航已常驻） */
-  .share-page .navbar, .orders-page .navbar, .cart-page .navbar { position: static; }
+  .share-page .page-head, .orders-page .page-head, .cart-page .page-head,
+  .profile-page .page-head, .forum-page .page-head { position: static; }
 
   /* 详情与表单：正文更易读 */
   .post-main { padding: 1.25rem 1.38rem; border-radius: 1rem; }
@@ -2357,4 +2394,269 @@ input, textarea, select { font: inherit; color: inherit; }
 @media (min-width: 1600px) {
   :root { --app-w: 1280px; }
   .forum-page { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ================================================================
+   重构层：统一的区块节奏 / 大标题页头 / 首页服务区 / 我的
+   放在文件末尾以覆盖同名的历史规则，新增类名均为本次重构引入
+   ================================================================ */
+
+/* 统一垂直节奏：页面直接子级之间只保留一档间距，消除手写残留值 */
+.home-page > * + *,
+.profile-page > * + *,
+.orders-page > * + *,
+.share-page > * + *,
+.share-detail > * + *,
+.cart-page > * + *,
+.checkout-page > * + *,
+.address-page > * + *,
+.form-page > * + *,
+.detail-page > * + *,
+.errand-page > * + *,
+.forum-page > * + * {
+  margin-top: var(--sp-4);
+  margin-bottom: 0;
+}
+
+.home-block + .home-block { margin-top: var(--gap-block); }
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.sec-head h2 { margin: 0; font-size: 1.06rem; font-weight: 700; letter-spacing: -0.01em; }
+.sec-note { color: var(--muted2); font-size: 0.72rem; }
+.sec-link { border: 0; background: none; padding: 0; color: var(--green); font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+
+/* ---------- 首页顶栏：地址 + 我的登记 ---------- */
+.home-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: calc(env(safe-area-inset-top) + var(--sp-3)) 0 var(--sp-3);
+  background: var(--bg);
+}
+.home-address {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--card);
+  border: 1px solid var(--green-line);
+  border-radius: 999px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease;
+}
+.home-address:active { transform: scale(0.98); }
+.home-address .icon { color: var(--green); flex: none; }
+.home-address-copy { min-width: 0; flex: 1; }
+.home-address-copy strong { display: block; font-size: 0.88rem; font-weight: 600; }
+.home-address-copy small {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-address-arrow { flex: none; color: var(--green); font-size: 0.72rem; font-weight: 600; }
+.home-orders {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--sp-1);
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+.home-orders .icon { color: var(--green); }
+
+/* ---------- 首页社区服务区：所有服务入口聚合在此 ---------- */
+.svc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.svc-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--card);
+  border: 1px solid var(--green-line);
+  border-radius: var(--r-md);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.svc-card:active { transform: scale(0.97); }
+.svc-ico {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+}
+.svc-copy { min-width: 0; display: grid; gap: 2px; }
+.svc-name-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.svc-name-row strong { font-size: 0.94rem; font-weight: 700; }
+.svc-desc { color: var(--muted); font-size: 0.72rem; }
+.svc-state {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.63rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.svc-state.on { background: var(--green-soft); color: var(--green); }
+.svc-state.wait { background: #FBECD8; color: var(--brown); }
+.svc-state.off { background: #EFEFEC; color: var(--muted2); }
+
+/* ---------- 我的：头像卡 + 分组列表 ---------- */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--card);
+  border: 1px solid var(--green-line);
+  border-radius: var(--r-md);
+}
+.profile-avatar {
+  width: 3rem;
+  height: 3rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  font-size: 1.13rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-hero-copy { flex: 1; min-width: 0; }
+.profile-hero-title { font-size: 1.06rem; font-weight: 700; }
+.profile-hero-sub { margin-top: 2px; color: var(--muted); font-size: 0.75rem; }
+.profile-edit { flex: none; border: 0; background: none; color: var(--green); font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+
+.group {
+  background: var(--card);
+  border: 1px solid var(--green-line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.group-title {
+  padding: var(--sp-2) var(--sp-4);
+  color: var(--muted2);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.row-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--row-h);
+  padding: var(--sp-2) var(--sp-4);
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.row-item:first-child,
+.group-title + .row-item { border-top: 0; }
+.row-item:active { background: #F6F8F4; }
+.row-title, .row-sub { display: block; }
+.row-ico {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+}
+.row-copy { flex: 1; min-width: 0; }
+.row-title { font-size: 0.88rem; font-weight: 600; }
+.row-sub { margin-top: 1px; color: var(--muted); font-size: 0.72rem; }
+.row-extra { flex: none; color: var(--muted2); font-size: 0.75rem; }
+.logout-btn {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--card);
+  color: var(--price);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.profile-note { color: var(--muted2); font-size: 0.69rem; line-height: 1.7; text-align: center; }
+
+/* ---------- 服务登记页：折叠的服务说明 ---------- */
+.svc-notes {
+  border-top: 1px dashed var(--green-line);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+}
+.svc-note-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.note-list { margin: var(--sp-2) 0 0; display: grid; gap: var(--sp-2); }
+.note-item { color: var(--muted); font-size: 0.75rem; line-height: 1.7; }
+.note-item strong { display: block; color: var(--ink); font-size: 0.78rem; }
+
+@media (hover: hover) {
+  .svc-card:hover { box-shadow: 0 1px 2px rgba(38, 53, 46, 0.05), 0 0.75rem 1.5rem -1.25rem rgba(38, 53, 46, 0.28); }
+  .row-item:hover { background: #F6F8F4; }
+}
+
+/* 手机上底部导航常驻，固定操作条需要抬到它上方 */
+@media (max-width: 767px) {
+  .cart-footer.dock,
+  .checkout-footer.dock,
+  .comment-bar.dock,
+  .publish-button.dock {
+    bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + var(--sp-2));
+  }
+}
+
+/* 手机上三个服务入口排成 2 + 1，最后一个占满整行更平衡 */
+@media (max-width: 1023px) {
+  .svc-grid .svc-card:last-child { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1024px) {
+  .svc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .page-head-title { font-size: 1.75rem; }
+  /* 双列网格页里，退出登录与说明整行贯通 */
+  .profile-page .logout-btn,
+  .profile-page .profile-note { grid-column: 1 / -1; }
 }

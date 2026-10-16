@@ -1,5 +1,5 @@
 import Icon from './Icon';
-import { back, redirect } from '../lib/router';
+import { redirect } from '../lib/router';
 
 export const TABS = [
   { path: '/', label: '社区', icon: 'home' },
@@ -7,22 +7,26 @@ export const TABS = [
   { path: '/profile', label: '我的', icon: 'user' }
 ];
 
-export function NavBar({ title, onBack, right, fallback = '/' }) {
+/**
+ * 大标题页头：不再提供返回箭头。
+ * 返回交给系统手势 / 浏览器返回 / 常驻底部 TabBar，避免三重返回入口。
+ */
+export function PageHeader({ title, sub, right }) {
   return (
-    <header className="navbar">
-      <button type="button" className="navbar-back" onClick={() => (onBack ? onBack() : back(fallback))} aria-label="返回">
-        <Icon name="back" size={22} />
-      </button>
-      <h1 className="navbar-title">{title}</h1>
-      <div className="navbar-right">{right}</div>
+    <header className="page-head">
+      <div className="page-head-copy">
+        <h1 className="page-head-title">{title}</h1>
+        {sub ? <p className="page-head-sub">{sub}</p> : null}
+      </div>
+      {right ? <div className="page-head-right">{right}</div> : null}
     </header>
   );
 }
 
-export function TabBar({ path, ghost = false }) {
+/** 底部主导航：所有页面常驻，二级页靠它或系统返回退出 */
+export function TabBar({ path }) {
   return (
-    <nav className={`tabbar dock ${ghost ? 'tabbar-ghost' : ''}`} aria-label="主导航">
-      {/* 宽屏时顶部导航会显示品牌，手机上隐藏 */}
+    <nav className="tabbar dock" aria-label="主导航">
       <div className="tabbar-brand">
         <span className="brand-mark">里</span>
         <span className="brand-name">爱尚里生活</span>
@@ -45,13 +49,5 @@ export function TabBar({ path, ghost = false }) {
         })}
       </div>
     </nav>
-  );
-}
-
-export function Screen({ children, withTabBar = false, className = '' }) {
-  return (
-    <div className={`screen ${withTabBar ? 'screen-tabbed' : ''} ${className}`.trim()}>
-      {children}
-    </div>
   );
 }

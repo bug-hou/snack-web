@@ -3,7 +3,7 @@ import UiHost from './components/UiHost';
 import { TabBar } from './components/Layout';
 import { Banner } from './components/Bits';
 import { useRoute, parsePath, redirect } from './lib/router';
-import { CONFIG_ERROR, currentUid, errorText, register, signInWithPassword } from './lib/cloud';
+import { CONFIG_ERROR, currentUid, errorText, register, signInWithPassword, signOut } from './lib/cloud';
 import Home from './pages/Home';
 import Forum from './pages/Forum';
 import ForumPost from './pages/ForumPost';
@@ -14,13 +14,10 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Address from './pages/Address';
-import Service from './pages/Service';
 import Errand from './pages/Errand';
 import Shares from './pages/Shares';
 import ShareForm from './pages/ShareForm';
 import ShareDetail from './pages/ShareDetail';
-
-const TAB_PATHS = ['/', '/forum', '/profile'];
 
 function ConfigScreen() {
   return (
@@ -129,7 +126,7 @@ function NotFound() {
   );
 }
 
-function resolvePage(segments, query) {
+function resolvePage(segments, query, onLogout) {
   const [first, second] = segments;
   if (!first) return { element: <Home />, title: '' };
   switch (first) {
@@ -139,7 +136,7 @@ function resolvePage(segments, query) {
       return { element: <ForumDetail id={second} />, title: '帖子详情' };
     case 'profile':
       if (second === 'edit') return { element: <ProfileEdit />, title: '个人资料' };
-      return { element: <Profile />, title: '' };
+      return { element: <Profile onLogout={onLogout} />, title: '' };
     case 'cart':
       return { element: <Cart />, title: '需求清单' };
     case 'checkout':
@@ -149,7 +146,9 @@ function resolvePage(segments, query) {
     case 'address':
       return { element: <Address from={query.from || ''} />, title: '收货地址' };
     case 'service':
-      return { element: <Service type={second || 'express'} />, title: '社区服务' };
+      // 旧的社区服务介绍页已下线：直接落到真实的服务登记页
+      if (second === 'secondhand') return { element: <Shares />, title: '' };
+      return { element: <Errand type={second === 'purchase' ? 'purchase' : 'express'} />, title: '' };
     case 'errand':
       return { element: <Errand type={second === 'purchase' ? 'purchase' : 'express'} />, title: second === 'purchase' ? '便利店代买' : '快递代取' };
     case 'shares':
@@ -187,6 +186,15 @@ export default function App() {
 
   const backToLogin = useCallback(() => setSession({ status: 'guest', uid: '' }), []);
 
+  const logout = useCallback(async () => {
+    try {
+      await signOut();
+    } finally {
+      setSession({ status: 'guest', uid: '' });
+      redirect('/');
+    }
+  }, []);
+
   if (CONFIG_ERROR) {
     return (
       <div className="app">
@@ -223,8 +231,7 @@ export default function App() {
   }
 
   const { segments, query } = parsePath(path);
-  const { element } = resolvePage(segments, query);
-  const isTab = TAB_PATHS.includes(path);
+  const { element } = resolvePage(segments, query, logout);
 
   return (
     <div className="app">
@@ -235,8 +242,8 @@ export default function App() {
         </div>
       ) : null}
       {element}
-      {/* 手机上只在 Tab 页显示底部导航；平板与桌面由 CSS 把它变成常驻顶部导航 */}
-      <TabBar path={path} ghost={!isTab} />
+      {/* 底部导航常驻所有页面：二级页不再需要返回箭头，靠它或系统返回退出 */}
+      <TabBar path={path} />
       <UiHost />
     </div>
   );

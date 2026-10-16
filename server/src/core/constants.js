@@ -56,7 +56,7 @@ export const TONES = ['peach', 'cocoa', 'butter', 'sage', 'rose', 'mango', 'lemo
 export const LEGACY_PRODUCT_IMAGES = ['/images/products/eggs.jpg', '/images/products/tissue.jpg', '/images/products/milk.jpg'];
 
 export const DEFAULT_SETTINGS = {
-  ordersEnabled: false,
+  ordersEnabled: true,
   businessStart: '09:00',
   businessEnd: '22:00',
   deliveryStart: '09:00',
@@ -64,20 +64,21 @@ export const DEFAULT_SETTINGS = {
   deliveryFeeCents: 0,
   minOrderCents: 0,
   ownerWechat: '',
-  expressEnabled: false,
+  // 社区服务默认全部在线，商家可在后台随时切成下线
+  expressEnabled: true,
   expressFollowShop: false,
   expressBaseFeeCents: 300,
   expressExtraFeeCents: 100,
   expressLargeFeeCents: 100,
   expressStart: '09:00',
   expressEnd: '21:00',
-  expressStations: [],
-  purchaseEnabled: false,
+  expressStations: ['菜鸟驿站', '丰巢快递柜'],
+  purchaseEnabled: true,
   purchaseFeeCents: 500,
   purchaseStart: '09:00',
   purchaseEnd: '21:00',
   purchaseStore: '京东便利店',
-  secondhandEnabled: false
+  secondhandEnabled: true
 };
 
 export const USER_PAGE_SIZE = 20;

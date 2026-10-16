@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { back } from '../lib/router';
 import { uploadImage } from '../lib/cloud';
 import { peekProfile, loadProfile, saveProfile } from '../lib/shop';
@@ -63,12 +63,7 @@ export default function ProfileEdit() {
 
   return (
     <div className="screen screen-padded edit-page">
-      <NavBar title="个人资料" fallback="/profile" />
-      <div className="page-lead">
-        <div className="small-kicker">MY PROFILE / 个人资料</div>
-        <div className="page-title">让邻居认识你<span className="title-period">.</span></div>
-        <div className="page-sub">头像与昵称只在「我的」展示，广场和闲置仍保持匿名</div>
-      </div>
+      <PageHeader title="个人资料" sub="头像与昵称只在「我的」展示，广场和闲置仍保持匿名" />
 
       <section className="card">
         <div className="card-title">头像</div>

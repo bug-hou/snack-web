@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../components/Icon';
+import { PageHeader } from '../components/Layout';
 import { EmptyState, Message } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -65,15 +66,11 @@ export default function Forum() {
 
   return (
     <div className="screen screen-tabbed forum-page">
-      <header className="forum-head">
-        <div className="forum-brand">
-          <span className="brand-mark">坊</span>
-          <div className="brand-copy">
-            <div className="brand-name">邻里广场</div>
-            <div className="brand-kicker">聊两句，问一声，搭把手</div>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        title="邻里广场"
+        sub="闲聊 · 互助求助 · 失物招领 · 社区公告"
+        right={<button type="button" className="page-head-link" onClick={() => navigate('/forum/new')}>发布</button>}
+      />
 
       <div className="chip-scroll">
         {BOARDS.map(item => (
@@ -142,11 +139,6 @@ export default function Forum() {
             ? <button type="button" className="more-button" onClick={() => load(false)}>加载更多</button>
             : <Message>没有更多帖子了</Message>
       ) : null}
-
-      <button type="button" className="publish-button dock dock-tabbed" onClick={() => navigate('/forum/new')}>
-        <Icon name="plus" size={15} />
-        <span>发布帖子</span>
-      </button>
     </div>
   );
 }

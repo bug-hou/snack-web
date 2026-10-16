@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Banner, EmptyState, Spinner } from '../components/Bits';
 import { redirect } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -226,11 +226,7 @@ export default function Orders() {
 
   return (
     <div className="screen screen-padded orders-page">
-      <NavBar title="我的需求" />
-      <div className="orders-head">
-        <div className="orders-title">我的需求</div>
-        <div className="orders-sub">查看需求登记、备货与送达进度</div>
-      </div>
+      <PageHeader title="我的需求" sub="查看需求登记、备货与送达进度" />
 
       <Banner>这里记录您提交的需求登记，仅用于进度沟通，不涉及在线支付；实际商品与费用请在线下当面确认。</Banner>
 

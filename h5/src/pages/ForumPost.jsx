@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Chip } from '../components/Bits';
 import { back, redirect } from '../lib/router';
 import { invoke, uploadImage } from '../lib/cloud';
@@ -67,11 +67,7 @@ export default function ForumPost() {
 
   return (
     <div className="screen screen-padded form-page">
-      <NavBar title="发布帖子" onBack={goBack} />
-      <div className="form-head">
-        <div className="form-title">发布帖子</div>
-        <div className="form-sub">写下想说的话，邻居们在广场就能看到</div>
-      </div>
+      <PageHeader title="发布帖子" sub="写下想说的话，邻居们在广场就能看到" />
 
       <section className="card">
         <div className="card-title">选择板块</div>

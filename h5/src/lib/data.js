@@ -141,6 +141,42 @@ export function decorateServices(config) {
   return services.map(item => ({ ...item, ...serviceStatus(config, item.id) }));
 }
 
+/* ---------- 首页服务入口：所有服务聚合在同一个区块，不按功能拆散 ---------- */
+
+export const SERVICE_ENTRIES = [
+  { id: 'express', name: '快递代取', icon: 'package', path: '/errand/express' },
+  { id: 'purchase', name: '便利店代买', icon: 'bag', path: '/errand/purchase' },
+  { id: 'secondhand', name: '邻里闲置', icon: 'repeat', path: '/shares' }
+];
+
+/** 在线 / 下线 / 未开放，三种状态全部由服务端配置决定，前端不写死文案 */
+export function serviceBadge(context, id) {
+  if (!context) return { text: '加载中', tone: 'off' };
+  if (id === 'secondhand') {
+    return context.secondhand && context.secondhand.enabled
+      ? { text: '在线', tone: 'on' }
+      : { text: '下线', tone: 'off' };
+  }
+  const service = context[id];
+  if (!service || !service.configured) return { text: '未开放', tone: 'off' };
+  return service.enabled ? { text: '在线', tone: 'on' } : { text: '下线', tone: 'wait' };
+}
+
+/** 入口卡上那一行说明：只展示能帮用户做决定的信息 */
+export function serviceSummary(context, id) {
+  if (!context) return '';
+  if (id === 'express') {
+    const service = context.express || {};
+    const base = money(safeCents(service.baseFeeCents));
+    return service.start ? `跑腿费 ¥${base} 起 · ${service.start}—${service.end}` : `跑腿费 ¥${base} 起`;
+  }
+  if (id === 'purchase') {
+    const service = context.purchase || {};
+    return `${service.store || '京东便利店'} · 跑腿费 ¥${money(safeCents(service.feeCents))}`;
+  }
+  return '二手转让，也可以免费分享';
+}
+
 /* ---------- 取件短信解析：全部为本地正则处理，不上传任何内容 ---------- */
 
 const CODE_WORDS = '(?:取件码|取货码|提取码|取件号|提取号|取件密码|取件验证码|验证码)';

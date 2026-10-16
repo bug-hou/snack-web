@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Chip, Message, Spinner } from '../components/Bits';
 import { back } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -109,12 +109,7 @@ export default function Address({ from = '' }) {
 
   return (
     <div className="screen screen-padded address-page">
-      <NavBar title="我的收货地址" />
-      <div className="heading">
-        <div className="eyebrow">送到家门口</div>
-        <div className="title">我的收货地址</div>
-        <div className="intro">保利爱尚里 · 仅支持 16 / 17 / 18 栋</div>
-      </div>
+      <PageHeader title="我的收货地址" sub="保利爱尚里 · 仅支持 16 / 17 / 18 栋" />
 
       {error ? <Message onClick={editing ? undefined : loadAddresses}>{error}{editing ? '' : ' · 点击重试'}</Message> : null}
       {loading ? <Spinner label="正在加载地址…" /> : null}

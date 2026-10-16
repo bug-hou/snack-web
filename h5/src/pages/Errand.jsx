@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Card, Chip, Message, Spinner } from '../components/Bits';
 import { navigate, redirect } from '../lib/router';
 import { invoke } from '../lib/cloud';
 import { getAddresses, peekContext, loadContext } from '../lib/shop';
-import { MAX_PACKAGES, PACKAGE_SIZES, QUICK_NOTES, SMS_SAMPLE, expressFee, money, parsePickupText, safeCents } from '../lib/data';
+import {
+  MAX_PACKAGES, PACKAGE_SIZES, QUICK_NOTES, SMS_SAMPLE,
+  expressFee, money, parsePickupText, safeCents, services
+} from '../lib/data';
 import { confirm, toast } from '../lib/ui';
 
 const emptyPackage = () => ({ code: '', phoneLast4: '', size: 'small' });
@@ -29,6 +32,7 @@ export default function Errand({ type = 'express' }) {
   const [parseNote, setParseNote] = useState('');
   const [parseTone, setParseTone] = useState('');
   const [status, setStatus] = useState({ text: '', tone: '', serviceTime: '', stations: [] });
+  const [notesOpen, setNotesOpen] = useState(false);
 
   const currentAddress = addresses[addressIndex] || null;
   const tail = currentAddress
@@ -40,6 +44,7 @@ export default function Errand({ type = 'express' }) {
     : '添加一个地址，登记时就不用重复填';
 
   const isExpress = type === 'express';
+  const introduction = services.find(item => item.id === type) || services[0];
 
   const applyConfig = useCallback((context) => {
     const next = isExpress ? context.express : context.purchase;
@@ -47,7 +52,7 @@ export default function Errand({ type = 'express' }) {
     const stations = Array.isArray(next.stations) ? next.stations : [];
     setConfig(next);
     setStatus({
-      text: next.enabled ? '营业中' : next.configured ? '休息中' : '暂未开放',
+      text: next.enabled ? '在线' : next.configured ? '下线' : '未开放',
       tone: next.enabled ? 'on' : next.configured ? 'wait' : 'off',
       serviceTime: `${next.start}—${next.end}`,
       stations
@@ -139,7 +144,7 @@ export default function Errand({ type = 'express' }) {
   async function submit() {
     if (submitting) return;
     if (!config || !config.enabled) {
-      toast(status.text === '休息中' ? `当前不在服务时间（${status.serviceTime}）` : '服务暂未开放');
+      toast(status.text === '下线' ? `当前不在服务时间（${status.serviceTime}）` : '服务暂未开放');
       return;
     }
     const address = addresses[addressIndex];
@@ -212,19 +217,18 @@ export default function Errand({ type = 'express' }) {
 
   return (
     <div className="screen screen-padded errand-page">
-      <NavBar title={isExpress ? '快递代取' : '便利店代买'} fallback="/" />
+      <PageHeader
+        title={isExpress ? '快递代取' : '便利店代买'}
+        sub={isExpress ? '选择站点，粘贴短信自动识别取件码' : '列好清单，跑腿带回'}
+      />
 
-      <div className="errand-head">
-        <div className="errand-title">{isExpress ? '快递代取' : '京东便利店代买'}</div>
-        <div className="errand-sub">{isExpress ? '选择站点，粘贴短信自动识别取件码' : '列好清单，跑腿带回'}</div>
-        {config ? (
-          <div className={`status-bar ${status.tone}`}>
-            <span className="status-dot" />
-            <span className="status-text">{status.text}</span>
-            <span className="status-time">服务时间 {status.serviceTime}</span>
-          </div>
-        ) : null}
-      </div>
+      {config ? (
+        <div className={`status-bar ${status.tone}`}>
+          <span className="status-dot" />
+          <span className="status-text">{status.text}</span>
+          <span className="status-time">服务时间 {status.serviceTime}</span>
+        </div>
+      ) : null}
 
       {loading ? <Spinner label="正在加载服务信息…" /> : null}
       {!loading && error ? <Message onClick={loadAll}>{error} · 点击重试</Message> : null}
@@ -398,6 +402,22 @@ export default function Errand({ type = 'express' }) {
             <div className="fee-rule">{feeRule}</div>
             {!isExpress ? <div className="fee-rule">商品金额由店主按实际购买报价，确认后再配送</div> : null}
           </section>
+
+          <div className="svc-notes">
+            <button type="button" className="svc-note-toggle" onClick={() => setNotesOpen(!notesOpen)}>
+              {notesOpen ? '收起服务说明' : '查看服务说明'}
+            </button>
+            {notesOpen ? (
+              <div className="note-list">
+                {introduction.rules.map(rule => (
+                  <div key={rule.title} className="note-item">
+                    <strong>{rule.title}</strong>
+                    {rule.description}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
           <button type="button" className="submit-button" onClick={submit} disabled={submitting || !config || !config.enabled}>
             {submitting ? '提交中…' : '提交服务订单'}

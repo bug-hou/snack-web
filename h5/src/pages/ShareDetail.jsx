@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Message } from '../components/Bits';
 import { back } from '../lib/router';
 import { invoke } from '../lib/cloud';
@@ -43,7 +43,7 @@ export default function ShareDetail({ id }) {
 
   return (
     <div className="screen screen-padded detail-page">
-      <NavBar title="物品详情" fallback="/shares" />
+      <PageHeader title="物品详情" />
 
       {loading ? <Message>正在加载物品…</Message> : null}
       {!loading && error ? <Message onClick={loadDetail}>{error} · 点击重试</Message> : null}

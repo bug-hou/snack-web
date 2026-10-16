@@ -11,6 +11,7 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "init-admin": "node scripts/init-admin.js",
+    "enable-services": "node scripts/enable-services.js",
     "migrate": "node scripts/migrate-from-cloudbase.js"
   },
   "dependencies": {

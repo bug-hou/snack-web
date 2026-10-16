@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { NavBar } from '../components/Layout';
+import { PageHeader } from '../components/Layout';
 import { Chip } from '../components/Bits';
-import { back, redirect } from '../lib/router';
+import { redirect } from '../lib/router';
 import { invoke, uploadImage } from '../lib/cloud';
 import { useCloudImages } from '../lib/useCloudImages';
 import { CONDITIONS, MODES } from '../lib/data';
-import { toast, confirm } from '../lib/ui';
+import { toast } from '../lib/ui';
 
 export default function ShareForm() {
   const [title, setTitle] = useState('');
@@ -74,21 +74,9 @@ export default function ShareForm() {
     }
   }
 
-  async function goBack() {
-    if (title || description || meetup || images.length) {
-      const ok = await confirm({ title: '放弃编辑', content: '已填写的内容不会保存。', confirmText: '放弃', danger: true });
-      if (!ok) return;
-    }
-    back('/shares');
-  }
-
   return (
     <div className="screen screen-padded form-page">
-      <NavBar title="发布闲置" onBack={goBack} />
-      <div className="form-head">
-        <div className="form-title">发布闲置</div>
-        <div className="form-sub">如实描述成色与瑕疵，让邻居放心接手</div>
-      </div>
+      <PageHeader title="发布闲置" sub="如实描述成色与瑕疵，让邻居放心接手" />
 
       <section className="card">
         <div className="card-title">物品名称</div>
