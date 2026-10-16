@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../components/Icon';
+import { SkeletonList } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { getProducts, loadProducts, categories } from '../lib/catalog';
 import { useCart, change } from '../lib/cart';
@@ -168,7 +169,7 @@ export default function Home() {
           ))}
         </div>
 
-        {loading ? <div className="empty-results">正在加载商品…</div> : null}
+        {loading ? <SkeletonList count={4} kind="card" /> : null}
         {!loading && catalogError ? (
           <div className="empty-results clickable" onClick={loadCatalog} role="button">{catalogError}</div>
         ) : null}

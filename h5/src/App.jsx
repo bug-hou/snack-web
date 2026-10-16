@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { cloneElement, useCallback, useEffect, useState } from 'react';
 import UiHost from './components/UiHost';
 import { TabBar } from './components/Layout';
 import { Banner } from './components/Bits';
@@ -241,7 +241,8 @@ export default function App() {
           <button type="button" onClick={backToLogin}>登录</button>
         </div>
       ) : null}
-      {element}
+      {/* key 变化即重新挂载页面，配合 .screen 入场动画做出原生页面的切换感 */}
+      {cloneElement(element, { key: path })}
       {/* 底部导航常驻所有页面：二级页不再需要返回箭头，靠它或系统返回退出 */}
       <TabBar path={path} />
       <UiHost />

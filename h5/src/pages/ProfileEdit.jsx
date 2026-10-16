@@ -62,7 +62,7 @@ export default function ProfileEdit() {
   const avatar = resolve(avatarUrl);
 
   return (
-    <div className="screen screen-padded edit-page">
+    <div className="screen screen-padded cta-page edit-page">
       <PageHeader title="个人资料" sub="头像与昵称只在「我的」展示，广场和闲置仍保持匿名" />
 
       <section className="card">
@@ -93,7 +93,7 @@ export default function ProfileEdit() {
 
       {error ? <div className="error-line">{error}</div> : null}
 
-      <button type="button" className={`primary-action submit ${saving || uploading ? 'is-disabled' : ''}`} onClick={save}>
+      <button type="button" className={`primary-action submit cta-dock ${saving || uploading ? 'is-disabled' : ''}`} onClick={save}>
         {saving ? '保存中…' : '保存资料'}
       </button>
       <div className="foot-note">资料保存在云端，仅本人可见，不会展示联系方式。</div>

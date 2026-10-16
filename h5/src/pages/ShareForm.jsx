@@ -5,14 +5,16 @@ import { redirect } from '../lib/router';
 import { invoke, uploadImage } from '../lib/cloud';
 import { useCloudImages } from '../lib/useCloudImages';
 import { CONDITIONS, MODES } from '../lib/data';
+import { prefs, savePrefs } from '../lib/prefs';
 import { toast } from '../lib/ui';
 
 export default function ShareForm() {
+  const saved = prefs();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [meetup, setMeetup] = useState('');
+  const [meetup, setMeetup] = useState(saved.meetup);
   const [price, setPrice] = useState('');
-  const [conditionIndex, setConditionIndex] = useState(0);
+  const [conditionIndex, setConditionIndex] = useState(1);
   const [modeIndex, setModeIndex] = useState(0);
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -56,6 +58,7 @@ export default function ShareForm() {
     setSubmitting(true);
     setError('');
     try {
+      savePrefs({ meetup: meetup.trim() });
       await invoke('createShare', {
         title: title.trim(),
         description: description.trim(),
@@ -75,7 +78,7 @@ export default function ShareForm() {
   }
 
   return (
-    <div className="screen screen-padded form-page">
+    <div className="screen screen-padded cta-page form-page">
       <PageHeader title="发布闲置" sub="如实描述成色与瑕疵，让邻居放心接手" />
 
       <section className="card">
@@ -149,7 +152,7 @@ export default function ShareForm() {
 
       {error ? <div className="error-line">{error}</div> : null}
 
-      <button type="button" className="submit-button" onClick={submit} disabled={submitting || uploading}>
+      <button type="button" className="submit-button cta-dock" onClick={submit} disabled={submitting || uploading}>
         {submitting ? '发布中…' : '发布闲置'}
       </button>
       <div className="foot-note">发布后立即对邻居公开；请不要发布他人物品或违规内容。</div>

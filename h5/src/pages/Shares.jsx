@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PageHeader } from '../components/Layout';
-import { Message } from '../components/Bits';
+import { Message, SkeletonList } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { invoke } from '../lib/cloud';
 import { useCloudImages } from '../lib/useCloudImages';
@@ -66,7 +66,7 @@ export default function Shares() {
         ))}
       </div>
 
-      {loading ? <Message>正在加载物品…</Message> : null}
+      {loading ? <SkeletonList count={3} kind="row" /> : null}
       {!loading && error ? <Message onClick={loadShares}>{error} · 点击重试</Message> : null}
       {!loading && !error && !list.length ? (
         <div className="share-empty">

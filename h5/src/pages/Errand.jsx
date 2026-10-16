@@ -8,6 +8,7 @@ import {
   MAX_PACKAGES, PACKAGE_SIZES, QUICK_NOTES, SMS_SAMPLE,
   expressFee, money, parsePickupText, safeCents, services
 } from '../lib/data';
+import { prefs, savePrefs, rememberPurchaseItems } from '../lib/prefs';
 import { confirm, toast } from '../lib/ui';
 
 const emptyPackage = () => ({ code: '', phoneLast4: '', size: 'small' });
@@ -27,7 +28,8 @@ export default function Errand({ type = 'express' }) {
   const [budget, setBudget] = useState('');
   const [note, setNote] = useState('');
   const [activeNotes, setActiveNotes] = useState([]);
-  const [smsOpen, setSmsOpen] = useState(false);
+  const [smsOpen, setSmsOpen] = useState(true);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [smsText, setSmsText] = useState('');
   const [parseNote, setParseNote] = useState('');
   const [parseTone, setParseTone] = useState('');
@@ -57,7 +59,8 @@ export default function Errand({ type = 'express' }) {
       serviceTime: `${next.start}—${next.end}`,
       stations
     });
-    setStation(current => (stations.includes(current) ? current : (stations.length === 1 ? stations[0] : '')));
+    const saved = prefs().station;
+    setStation(() => (stations.includes(saved) ? saved : (stations.length === 1 ? stations[0] : '')));
   }, [isExpress]);
 
   const loadAll = useCallback(async () => {
@@ -206,6 +209,9 @@ export default function Errand({ type = 'express' }) {
     setSubmitting(true);
     try {
       await invoke('createServiceOrder', payload);
+      // 记住这次的选择，下一次登记就不用再选一遍
+      if (isExpress) savePrefs({ station });
+      else rememberPurchaseItems(payload.items.map(item => item.name));
       toast(isExpress ? '代取需求已登记' : '代买需求已登记');
       redirect('/orders');
     } catch (e) {
@@ -216,7 +222,7 @@ export default function Errand({ type = 'express' }) {
   }
 
   return (
-    <div className="screen screen-padded errand-page">
+    <div className="screen screen-padded cta-page errand-page">
       <PageHeader
         title={isExpress ? '快递代取' : '便利店代买'}
         sub={isExpress ? '选择站点，粘贴短信自动识别取件码' : '列好清单，跑腿带回'}
@@ -339,6 +345,23 @@ export default function Errand({ type = 'express' }) {
           ) : (
             <Card title="代买清单">
               <div className="hint">{config ? config.store : '京东便利店'}等非官方代买，商品金额按实际门店结算</div>
+
+              {prefs().purchaseItems.length ? (
+                <div className="quick-picks">
+                  <span className="quick-picks-label">买过的</span>
+                  {prefs().purchaseItems.map(name => (
+                    <button
+                      key={name}
+                      type="button"
+                      className="chip small"
+                      onClick={() => setItems(list => (list.length >= 10 ? list : list.concat({ ...emptyItem(), name })))}
+                    >
+                      ＋ {name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
               {items.map((item, index) => (
                 <div key={`item-${index}`} className="pkg">
                   <div className="pkg-head">
@@ -351,27 +374,43 @@ export default function Errand({ type = 'express' }) {
                     <span className="pkg-label">名称</span>
                     <input className="pkg-input" value={item.name} maxLength={40} placeholder="如 可口可乐" onChange={event => updateItem(index, 'name', event.target.value)} />
                   </label>
-                  <label className="pkg-row">
-                    <span className="pkg-label">规格</span>
-                    <input className="pkg-input" value={item.spec} maxLength={30} placeholder="选填，如 500ml" onChange={event => updateItem(index, 'spec', event.target.value)} />
-                  </label>
-                  <label className="pkg-row">
+                  <div className="pkg-row">
                     <span className="pkg-label">数量</span>
-                    <input className="pkg-input" inputMode="numeric" value={item.quantity} maxLength={2} placeholder="1" onChange={event => updateItem(index, 'quantity', event.target.value)} />
-                  </label>
+                    <div className="cart-controls">
+                      <button type="button" className="cart-btn" onClick={() => updateItem(index, 'quantity', Math.max(1, (Number(item.quantity) || 1) - 1))} aria-label="减少">－</button>
+                      <span>{Number(item.quantity) || 1}</span>
+                      <button type="button" className="cart-btn plus" onClick={() => updateItem(index, 'quantity', Math.min(20, (Number(item.quantity) || 1) + 1))} aria-label="增加">＋</button>
+                    </div>
+                  </div>
+                  {moreOpen ? (
+                    <label className="pkg-row">
+                      <span className="pkg-label">规格</span>
+                      <input className="pkg-input" value={item.spec} maxLength={30} placeholder="选填，如 500ml" onChange={event => updateItem(index, 'spec', event.target.value)} />
+                    </label>
+                  ) : null}
                 </div>
               ))}
               <button type="button" className="add-more" onClick={() => setItems(list => (list.length >= 10 ? list : list.concat(emptyItem())))}>
                 ＋ 再加一项（最多 10 项）
               </button>
-              <div className="switch-line" onClick={() => setAllowSubstitute(!allowSubstitute)} role="button">
-                <span>缺货时允许同类替换</span>
-                <span className={`switch ${allowSubstitute ? 'on' : ''}`}>{allowSubstitute ? '已开启' : '已关闭'}</span>
+
+              <div className="more-block">
+                <button type="button" className="more-toggle" onClick={() => setMoreOpen(!moreOpen)}>
+                  {moreOpen ? '收起选填项' : '选填：规格、替换与预估金额'}
+                </button>
+                {moreOpen ? (
+                  <div className="more-body">
+                    <div className="switch-line" onClick={() => setAllowSubstitute(!allowSubstitute)} role="button">
+                      <span>缺货时允许同类替换</span>
+                      <span className={`switch ${allowSubstitute ? 'on' : ''}`}>{allowSubstitute ? '已开启' : '已关闭'}</span>
+                    </div>
+                    <label className="pkg-row">
+                      <span className="pkg-label">预估金额</span>
+                      <input className="pkg-input" inputMode="decimal" value={budget} placeholder="选填，便于店主备货" onChange={event => setBudget(event.target.value)} />
+                    </label>
+                  </div>
+                ) : null}
               </div>
-              <label className="pkg-row">
-                <span className="pkg-label">预估金额</span>
-                <input className="pkg-input" inputMode="decimal" value={budget} placeholder="选填，便于店主备货" onChange={event => setBudget(event.target.value)} />
-              </label>
             </Card>
           )}
 
@@ -419,7 +458,7 @@ export default function Errand({ type = 'express' }) {
             ) : null}
           </div>
 
-          <button type="button" className="submit-button" onClick={submit} disabled={submitting || !config || !config.enabled}>
+          <button type="button" className="submit-button cta-dock" onClick={submit} disabled={submitting || !config || !config.enabled}>
             {submitting ? '提交中…' : '提交服务订单'}
           </button>
           <div className="foot-note">线下当面结算 · 服务时间以店铺配置为准</div>

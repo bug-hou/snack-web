@@ -5,10 +5,11 @@ import { back, redirect } from '../lib/router';
 import { invoke, uploadImage } from '../lib/cloud';
 import { useCloudImages } from '../lib/useCloudImages';
 import { POST_BOARDS } from '../lib/data';
+import { prefs, savePrefs } from '../lib/prefs';
 import { toast, confirm } from '../lib/ui';
 
 export default function ForumPost() {
-  const [board, setBoard] = useState('chat');
+  const [board, setBoard] = useState(() => prefs().board || 'chat');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState([]);
@@ -55,6 +56,7 @@ export default function ForumPost() {
     setSubmitting(true);
     setError('');
     try {
+      savePrefs({ board });
       await invoke('createPost', { board, title: title.trim(), content: content.trim(), images });
       toast('已发布到广场');
       redirect('/forum');

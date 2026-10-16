@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../components/Layout';
-import { Banner, EmptyState, Spinner } from '../components/Bits';
+import { Banner, EmptyState, SkeletonList } from '../components/Bits';
 import { redirect } from '../lib/router';
 import { invoke } from '../lib/cloud';
 import { getProducts, loadProducts } from '../lib/catalog';
@@ -250,7 +250,7 @@ export default function Orders() {
         ))}
       </div>
 
-      {loading ? <Spinner label="正在加载…" /> : null}
+      {loading ? <SkeletonList count={3} kind="row" /> : null}
       {!loading && error ? (
         <div className="message-line">
           <div>{error}</div>

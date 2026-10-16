@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Icon from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { EmptyState, Message } from '../components/Bits';
+import { EmptyState, Message, SkeletonList } from '../components/Bits';
 import { navigate } from '../lib/router';
 import { invoke } from '../lib/cloud';
 import { BOARDS, boardName, excerpt, timeAgo } from '../lib/data';
@@ -87,7 +87,7 @@ export default function Forum() {
 
       <div className="forum-notice">广场只做邻里信息交流：请勿发布交易、广告、二维码或个人联系方式。违规内容会被下架。</div>
 
-      {loading ? <Message>正在加载帖子…</Message> : null}
+      {loading ? <SkeletonList count={4} kind="row" /> : null}
       {!loading && error ? <Message onClick={() => load(true)}>{error} · 点击重试</Message> : null}
       {!loading && !error && !posts.length ? (
         <div className="forum-empty">
