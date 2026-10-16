@@ -1,6 +1,6 @@
 const { peekProfile, loadProfile, saveProfile } = require('../../utils/snack-profile');
+const { uploadImage } = require('../../utils/snack-cloud');
 
-const randomId = () => Array.from({ length: 16 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
 const initialOf = nickName => (nickName ? nickName.slice(0, 1) : '里');
 
 Page({
@@ -23,8 +23,9 @@ Page({
     if (!file || this.data.uploading) return;
     this.setData({ uploading: true, error: '' });
     try {
-      const uploaded = await wx.cloud.uploadFile({ cloudPath: `avatar/${randomId()}.png`, filePath: file });
-      this.setData({ avatarUrl: uploaded.fileID, uploading: false });
+      // 上传到自建后端，返回 /uploads/avatar/<file> 或 COS 地址
+      const url = await uploadImage(file, 'avatar');
+      this.setData({ avatarUrl: url, uploading: false });
     } catch (error) {
       this.setData({ uploading: false, error: '头像上传失败，请重试' });
     }

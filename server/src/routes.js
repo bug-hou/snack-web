@@ -15,6 +15,7 @@ import * as shares from './modules/shares.js';
 import * as forum from './modules/forum.js';
 import * as profile from './modules/profile.js';
 import * as adminModule from './modules/admin.js';
+import * as wechat from './modules/wechat.js';
 
 const router = Router();
 
@@ -59,6 +60,10 @@ router.get('/sayhi', wrap(async () => {
 /* ---------------- 账号 ---------------- */
 router.post('/auth/register', wrap((req) => auth.register(body(req))));
 router.post('/auth/login', wrap((req) => auth.login(body(req))));
+// 微信小程序登录：code 换 openid，首次自动建号
+router.post('/auth/wechat', wrap((req) => wechat.loginWithCode((body(req) || {}).code)));
+// 微信账号补设用户名密码，之后可在网站登录
+router.post('/auth/bind-password', requireAuth, wrap((req) => wechat.bindPassword(req.user, body(req))));
 router.get('/auth/me', requireAuth, wrap((req) => auth.me(req.user)));
 router.post('/auth/password', requireAuth, wrap((req) => auth.changePassword(req.user, body(req))));
 router.patch('/auth/nickname', requireAuth, wrap((req) => auth.updateNickName(req.user, body(req))));

@@ -29,6 +29,10 @@ export const config = {
     private: process.env.COS_PRIVATE === 'true',
     signExpires: Number(process.env.COS_SIGN_EXPIRES || 7200)
   },
+  wechat: {
+    appId: process.env.WX_APPID || '',
+    appSecret: process.env.WX_APPSECRET || ''
+  },
   tms: {
     enabled: process.env.TMS_ENABLED === 'true',
     secretId: process.env.TMS_SECRET_ID || '',
