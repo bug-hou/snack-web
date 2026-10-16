@@ -19,9 +19,9 @@ export function NavBar({ title, onBack, right, fallback = '/' }) {
   );
 }
 
-export function TabBar({ path }) {
+export function TabBar({ path, ghost = false }) {
   return (
-    <nav className="tabbar dock" aria-label="主导航">
+    <nav className={`tabbar dock ${ghost ? 'tabbar-ghost' : ''}`} aria-label="主导航">
       {/* 宽屏时顶部导航会显示品牌，手机上隐藏 */}
       <div className="tabbar-brand">
         <span className="brand-mark">里</span>

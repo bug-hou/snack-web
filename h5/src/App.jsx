@@ -235,7 +235,8 @@ export default function App() {
         </div>
       ) : null}
       {element}
-      {isTab ? <TabBar path={path} /> : null}
+      {/* 手机上只在 Tab 页显示底部导航；平板与桌面由 CSS 把它变成常驻顶部导航 */}
+      <TabBar path={path} ghost={!isTab} />
       <UiHost />
     </div>
   );
